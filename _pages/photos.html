@@ -1,0 +1,130 @@
+---
+layout: archive
+title: "Photos"
+permalink: /photos/
+author_profile: true
+---
+
+{% include base_path %}
+
+{% assign photo_files = site.static_files | where_exp: "file", "file.path contains '/images/photos/'" | sort: "name" %}
+
+<div class="photo-grid">
+{% for file in photo_files %}
+  <a href="{{ file.path | prepend: base_path }}" class="photo-grid__item">
+    <img src="{{ file.path | prepend: base_path }}" alt="" loading="lazy">
+  </a>
+{% endfor %}
+</div>
+
+<div id="lightbox-overlay" class="lightbox-overlay">
+  <span class="lightbox-overlay__close" aria-label="Close">&times;</span>
+  <span class="lightbox-overlay__prev" aria-label="Previous photo">&#10094;</span>
+  <img class="lightbox-overlay__img" src="" alt="">
+  <span class="lightbox-overlay__next" aria-label="Next photo">&#10095;</span>
+</div>
+
+<script>
+(function () {
+  var overlay = document.getElementById('lightbox-overlay');
+  var overlayImg = overlay.querySelector('.lightbox-overlay__img');
+  var closeBtn = overlay.querySelector('.lightbox-overlay__close');
+  var prevBtn = overlay.querySelector('.lightbox-overlay__prev');
+  var nextBtn = overlay.querySelector('.lightbox-overlay__next');
+  var items = Array.prototype.slice.call(document.querySelectorAll('.photo-grid__item'));
+  var currentIndex = -1;
+
+  function showPhoto(index) {
+    if (!items.length) return;
+    currentIndex = (index + items.length) % items.length;
+    overlayImg.src = items[currentIndex].getAttribute('href');
+    overlay.classList.add('is-active');
+  }
+
+  function closeLightbox() {
+    overlay.classList.remove('is-active');
+    overlayImg.src = '';
+    currentIndex = -1;
+  }
+
+  items.forEach(function (item, index) {
+    item.addEventListener('click', function (e) {
+      e.preventDefault();
+      showPhoto(index);
+    });
+  });
+
+  closeBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    closeLightbox();
+  });
+  prevBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    showPhoto(currentIndex - 1);
+  });
+  nextBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    showPhoto(currentIndex + 1);
+  });
+
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay) closeLightbox();
+  });
+
+  // Press-and-hold to zoom into the photo, anchored under the cursor
+  var zoomRect = null;
+
+  function updateZoomOrigin(e) {
+    if (!zoomRect) return;
+    var x = ((e.clientX - zoomRect.left) / zoomRect.width) * 100;
+    var y = ((e.clientY - zoomRect.top) / zoomRect.height) * 100;
+    x = Math.max(0, Math.min(100, x));
+    y = Math.max(0, Math.min(100, y));
+    overlayImg.style.transformOrigin = x + '% ' + y + '%';
+  }
+
+  overlayImg.addEventListener('mousedown', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    zoomRect = overlayImg.getBoundingClientRect();
+    updateZoomOrigin(e);
+    overlayImg.classList.add('is-zoomed');
+  });
+
+  document.addEventListener('mousemove', function (e) {
+    if (overlayImg.classList.contains('is-zoomed')) updateZoomOrigin(e);
+  });
+
+  function stopZoom() {
+    overlayImg.classList.remove('is-zoomed');
+    zoomRect = null;
+  }
+  document.addEventListener('mouseup', stopZoom);
+
+  document.addEventListener('keydown', function (e) {
+    if (!overlay.classList.contains('is-active')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowRight') showPhoto(currentIndex + 1);
+    if (e.key === 'ArrowLeft') showPhoto(currentIndex - 1);
+  });
+
+  // Swipe support for touch devices
+  var touchStartX = null;
+  overlay.addEventListener('touchstart', function (e) {
+    touchStartX = e.changedTouches[0].clientX;
+  });
+  overlay.addEventListener('touchend', function (e) {
+    if (touchStartX === null) return;
+    var deltaX = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(deltaX) > 40) {
+      if (deltaX < 0) {
+        showPhoto(currentIndex + 1);
+      } else {
+        showPhoto(currentIndex - 1);
+      }
+    }
+    touchStartX = null;
+  });
+})();
+</script>
+

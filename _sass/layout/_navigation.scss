@@ -234,6 +234,15 @@
       }
     }
 
+    #site-home {
+      a {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 0.75rem;
+        font-size: 1.3rem;
+      }
+    }
+
     a {
       position: relative;
 

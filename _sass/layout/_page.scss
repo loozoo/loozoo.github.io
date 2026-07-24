@@ -5,6 +5,10 @@
 #main {
   @include container;
   @include clearfix;
+  /* sticky footer fix: guarantee at least one viewport's worth of height so a
+     short page's footer still lands at the bottom instead of riding up under
+     the content (the sidebar is fixed/full-height and won't force this itself) */
+  min-height: calc(100vh - #{$masthead-height});
   margin-top: 2em;
   padding-left: 1em;
   padding-right: 1em;
