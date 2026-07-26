@@ -1,7 +1,6 @@
 ---
 title: "NZPMC Workshop Resources"
 collection: teaching
-category: writing
 published: true
 permalink: /teaching/NZPMC
 order: 30
