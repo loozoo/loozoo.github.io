@@ -1,0 +1,17 @@
+<div class="research-item">
+  <h3 class="research-item__title">{{ post.title | markdownify | remove: "<p>" | remove: "</p>" }}</h3>
+
+  {% if post.date_label or post.tags.size > 0 %}
+    <p class="research-item__meta">
+      {% if post.date_label %}<span class="research-item__date">{{ post.date_label }}</span>{% endif %}
+      {% for tag in post.tags %}<span class="research-item__tag">{{ tag }}</span>{% endfor %}
+    </p>
+  {% endif %}
+
+  {% assign description = post.description | default: post.content %}
+  {% if description != "" %}
+    <div class="research-item__description">
+      {% if post.description %}{{ post.description | markdownify }}{% else %}{{ post.content }}{% endif %}
+    </div>
+  {% endif %}
+</div>

@@ -3,34 +3,63 @@ layout: archive
 title: "Research"
 permalink: /research/
 author_profile: true
+hide_title: true
 ---
 
 {% if site.author.googlescholar %}
   <div class="wordwrap">You can also find my articles on <a href="{{site.author.googlescholar}}">my Google Scholar profile</a>.</div>
 {% endif %}
 
-{% include base_path %}
+{% assign research_items = site.research | sort: "order" %}
 
-<!-- New style rendering if publication categories are defined -->
 {% if site.publication_category %}
-  {% for category in site.publication_category  %}
-    {% assign title_shown = false %}
-    {% for post in site.research reversed %}
-      {% if post.category != category[0] %}
-        {% continue %}
+  {% comment %} The goo/metaball SVG filter def now lives in _layouts/default.html
+     (persistent shell) so its url(#research-tabs-goo) reference survives Swup swaps. {% endcomment %}
+  <div class="research-tabs" role="tablist">
+    <div class="research-tabs__goo">
+      <span class="research-tabs__thumb-echo" aria-hidden="true"></span>
+      <span class="research-tabs__thumb" aria-hidden="true"></span>
+    </div>
+    {% assign tab_index = 0 %}
+    {% for category in site.publication_category %}
+      {% assign item_count = 0 %}
+      {% for post in research_items %}
+        {% if post.category == category[0] %}{% assign item_count = item_count | plus: 1 %}{% endif %}
+      {% endfor %}
+      {% if item_count > 0 %}
+        <button type="button" role="tab" class="research-tabs__btn{% if tab_index == 0 %} is-active{% endif %}" data-panel="{{ category[0] }}">{{ category[1].title }}</button>
+        {% assign tab_index = tab_index | plus: 1 %}
       {% endif %}
-      {% unless title_shown %}
-        <h2>{{ category[1].title }}</h2><hr />
-        {% assign title_shown = true %}
-      {% endunless %}
-      {% include archive-single.html %}
     {% endfor %}
+  </div>
+
+  {% assign panel_index = 0 %}
+  {% for category in site.publication_category %}
+    {% assign item_count = 0 %}
+    {% for post in research_items %}
+      {% if post.category == category[0] %}{% assign item_count = item_count | plus: 1 %}{% endif %}
+    {% endfor %}
+    {% if item_count > 0 %}
+      <div class="research-panel research-list{% if panel_index == 0 %} is-active{% endif %}" id="panel-{{ category[0] }}" role="tabpanel">
+        {% for post in research_items %}
+          {% if post.category != category[0] %}
+            {% continue %}
+          {% endif %}
+          {% include research-single.html %}
+        {% endfor %}
+      </div>
+      {% assign panel_index = panel_index | plus: 1 %}
+    {% endif %}
   {% endfor %}
+
+  {% comment %}
+    The tab interaction lives in assets/js/_main.js (initResearchTabs), so it
+    can be re-initialized after in-page Swup navigations. See _includes/swup.html.
+  {% endcomment %}
 {% else %}
-  {% for post in site.research reversed %}
-    {% include archive-single.html %}
+  <div class="research-list">
+  {% for post in research_items %}
+    {% include research-single.html %}
   {% endfor %}
+  </div>
 {% endif %}
-
-
-

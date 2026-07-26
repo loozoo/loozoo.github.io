@@ -70,9 +70,10 @@ a {
   color: var(--global-link-color);
 }
 
-/* Apply focus state */
+/* Apply focus state — only for keyboard navigation, so a mouse click doesn't
+   leave the outline box lingering around links/headings. */
 
-a:focus {
+a:focus-visible {
   @extend %tab-focus;
 }
 

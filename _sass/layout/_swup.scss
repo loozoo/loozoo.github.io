@@ -1,0 +1,31 @@
+/* ==========================================================================
+   SWUP — smooth in-page navigation
+   Only the #page-content region is swapped between pages; the masthead and
+   sidebar stay mounted. A quick opacity fade covers the content swap.
+   ========================================================================== */
+
+// Duration must match `containers`/animation timing read by Swup from this
+// element's transition (see _includes/swup.html).
+$swup-fade-duration: 200ms;
+
+#page-content {
+  transition: opacity $swup-fade-duration ease;
+  will-change: opacity;
+}
+
+// Swup adds `.is-animating` to <html> for the out phase (and keeps it until the
+// in phase finishes). Fading only while animating means a plain, JS-less page
+// (or a failed CDN load) always shows content at full opacity.
+html.is-animating #page-content {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #page-content {
+    transition: none;
+  }
+
+  html.is-animating #page-content {
+    opacity: 1;
+  }
+}

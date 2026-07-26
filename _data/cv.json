@@ -1,152 +1,173 @@
 {
   "basics": {
-    "name": "Your Sidebar Name",
-    "email": "none@example.org",
-    "phone": "",
-    "website": "https://academicpages.github.io",
-    "summary": "Currently employed at Red Brick University. Short biography for the left-hand sidebar",
+    "name": "Luke Zhu",
+    "label": "Mathematics & Physics, Harvard College",
+    "email": "lukezhu@college.harvard.edu",
+    "phone": "+1 617 233 5257",
+    "website": "https://loozoo.github.io",
+    "summary": "Undergraduate at Harvard College double majoring in Mathematics (Honors) and Physics, with a concurrent A.M. in Mathematics. Research interests in algebra, geometry, and topology, particularly applications to quantum error correction and topological data analysis.",
     "location": {
       "address": "",
       "postalCode": "",
-      "city": "Earth",
+      "city": "Cambridge",
       "countryCode": "US",
-      "region": ""
+      "region": "MA"
     },
     "profiles": [
       {
-        "network": "Google Scholar",
-        "username": "",
-        "url": "https://scholar.google.com/citations?user=PS_CX0AAAAAJ"
-      },
-      {
-        "network": "ORCID",
-        "username": "",
-        "url": "https://orcid.org/yourorcidurl"
-      },
-      {
         "network": "GitHub",
-        "username": "academicpages",
-        "url": "https://github.com/academicpages"
+        "username": "loozoo",
+        "url": "https://github.com/loozoo"
       }
     ]
   },
-  "work": [],
   "education": [
     {
-      "institution": "GitHub University",
-      "area": "Ph.D in Version Control Theory",
+      "institution": "Harvard University",
+      "area": "A.B. in Mathematics (Honors) and Physics; A.M. in Mathematics (Concurrent)",
       "studyType": "",
-      "startDate": "",
-      "endDate": "2018",
-      "gpa": null,
-      "courses": []
+      "startDate": "2023-08",
+      "endDate": "2027-05",
+      "gpa": "3.99/4.00",
+      "courses": [
+        "MATH 55a/b",
+        "MATH 231a (grad. algebraic topology)",
+        "MATH 232ar (grad. algebraic geometry)",
+        "MATH 136/137 (differential & algebraic geometry)",
+        "PHYSICS 143 (quantum mechanics)",
+        "CS50",
+        "STAT 110"
+      ]
     },
     {
-      "institution": "GitHub University",
-      "area": "M.S. in Jekyll",
+      "institution": "University of Oxford",
+      "area": "Visiting Student, Oriel College; Mathematical Institute",
       "studyType": "",
-      "startDate": "",
-      "endDate": "2014",
+      "startDate": "2026-01",
+      "endDate": "2026-06",
       "gpa": null,
-      "courses": []
+      "courses": [
+        "Computational Algebraic Topology (Part C)",
+        "Networks (Part C)"
+      ]
+    }
+  ],
+  "work": [
+    {
+      "company": "Harvard University",
+      "position": "Course Assistant, MATH 101/136",
+      "startDate": "2025-01",
+      "endDate": "",
+      "summary": "",
+      "highlights": [
+        "Lead weekly office hours and recitation sessions to improve student understanding",
+        "Grade student assignments, helping students improve rigour and exposition"
+      ]
     },
     {
-      "institution": "GitHub University",
-      "area": "B.S. in GitHub",
-      "studyType": "",
+      "company": "NZPMC Limited",
+      "position": "Academic Lead",
+      "startDate": "2022-08",
+      "endDate": "",
+      "summary": "",
+      "highlights": [
+        "Lead academic content design for nationwide mathematics and physics competitions",
+        "Design novel problems requiring physical intuition and creative quantitative reasoning"
+      ]
+    },
+    {
+      "company": "St Andrew's College",
+      "position": "Learning Support & Academic Enrichment Staff, Teacher Aide, Mathematics Tutor",
+      "startDate": "2023-01",
+      "endDate": "2024-08",
+      "summary": "",
+      "highlights": [
+        "Designed enrichment materials extending advanced students beyond curriculum",
+        "Mentored students and collaborated with faculty on classroom instruction"
+      ]
+    }
+  ],
+  "awards": [
+    {
+      "title": "John Harvard Scholar",
+      "date": "2024, 2025",
+      "awarder": "Harvard College",
+      "summary": "Awarded to students in the top 5% of their Harvard College class."
+    },
+    {
+      "title": "Detur Prize",
+      "date": "2025",
+      "awarder": "Harvard College",
+      "summary": "The oldest prize at Harvard College, awarded to sophomores in high academic standing."
+    },
+    {
+      "title": "Harvard College Research Program",
+      "date": "2025",
+      "awarder": "Harvard College",
+      "summary": "Competitive funding awarded to pursue independent scholarly research."
+    },
+    {
+      "title": "International Mathematical Modelling Challenge",
+      "date": "2022",
+      "awarder": "IMMC",
+      "summary": "Won for New Zealand (Outstanding award)."
+    },
+    {
+      "title": "NZQA New Zealand Outstanding Scholar Award",
+      "date": "2023",
+      "awarder": "NZQA",
+      "summary": "Recognised among New Zealand's top secondary students for exceptional performance across national scholarship examinations."
+    }
+  ],
+  "projects": [
+    {
+      "name": "Harvard Honors Thesis",
+      "date": "",
+      "description": "Research in quantum stabilizer codes (a mathematical framework for error correction in quantum computers) through algebraic and topological interpretations. Advised by Bowen Yang at Harvard's CMSA."
+    },
+    {
+      "name": "Affine Group Schemes",
+      "date": "",
+      "description": "Studying affine group schemes and commutative Hopf algebras with a view towards generalising the theory to symmetric monoidal categories. Advised by Professor Kobi Kremnitzer at Oxford."
+    },
+    {
+      "name": "Machine Learning for Knot Theory",
+      "date": "",
+      "description": "Received Harvard funding to research applications of machine learning in knot theory, with applications to invariant prediction, classification tasks, and biopolymer identification."
+    },
+    {
+      "name": "HARDMATH2 (NeurIPS 2025)",
+      "date": "",
+      "description": "Developed benchmark tasks for evaluating LLM performance on applied mathematics problems, with emphasis on multi-step modeling, quantitative reasoning, and solution verification."
+    },
+    {
+      "name": "ETG x NASA VECAR Project",
+      "date": "",
+      "description": "Collaborated with NASA's Volatiles Extraction Cryocapture & Recovery project, designing a lunar-capable device to extract and return soil volatiles to Earth via the Artemis program."
+    }
+  ],
+  "volunteer": [
+    {
+      "organization": "Harvard Square Homeless Shelter",
+      "position": "Volunteer",
       "startDate": "",
-      "endDate": "2012",
-      "gpa": null,
-      "courses": []
+      "endDate": "",
+      "summary": "Volunteer for HSHS on weekends, working breakfast and evening shifts."
+    },
+    {
+      "organization": "Cambridge Math Circle",
+      "position": "Teacher",
+      "startDate": "",
+      "endDate": "",
+      "summary": "Teacher for the CMC, a 501(c)3 registered nonprofit that delivers maths enrichment to K-8 students from Cambridge and the Greater Boston area, with a focus on children commonly underrepresented in STEM."
     }
   ],
   "skills": [],
   "languages": [],
   "interests": [],
   "references": [],
-  "publications": [
-    {
-      "name": "Paper Title Number 1",
-      "publisher": "Journal 1",
-      "releaseDate": "2009-10-01",
-      "website": "https://academicpages.github.io/files/paper1.pdf",
-      "summary": "This paper is about the number 1. The number 2 is left for future work."
-    },
-    {
-      "name": "Paper Title Number 2",
-      "publisher": "Journal 1",
-      "releaseDate": "2010-10-01",
-      "website": "https://academicpages.github.io/files/paper2.pdf",
-      "summary": "This paper is about the number 2. The number 3 is left for future work."
-    },
-    {
-      "name": "Paper Title Number 3",
-      "publisher": "Journal 1",
-      "releaseDate": "2015-10-01",
-      "website": "https://academicpages.github.io/files/paper3.pdf",
-      "summary": "This paper is about the number 3. The number 4 is left for future work."
-    },
-    {
-      "name": "Paper Title Number 4",
-      "publisher": "GitHub Journal of Bugs",
-      "releaseDate": "2024-02-17",
-      "website": "https://academicpages.github.io/files/paper3.pdf",
-      "summary": "This paper is about fixing template issue #693."
-    }
-  ],
-  "presentations": [
-    {
-      "name": "Talk 1 on Relevant Topic in Your Field",
-      "event": "UC San Francisco, Department of Testing",
-      "date": "2012-03-01",
-      "location": "San Francisco, CA, USA",
-      "description": ""
-    },
-    {
-      "name": "Tutorial 1 on Relevant Topic in Your Field",
-      "event": "UC-Berkeley Institute for Testing Science",
-      "date": "2013-03-01",
-      "location": "Berkeley, CA, USA",
-      "description": ""
-    },
-    {
-      "name": "Talk 2 on Relevant Topic in Your Field",
-      "event": "London School of Testing",
-      "date": "2014-02-01",
-      "location": "London, UK",
-      "description": ""
-    },
-    {
-      "name": "Conference Proceeding talk 3 on Relevant Topic in Your Field",
-      "event": "Testing Institute of America 2014 Annual Conference",
-      "date": "2014-03-01",
-      "location": "Los Angeles, CA, USA",
-      "description": ""
-    }
-  ],
-  "teaching": [
-    {
-      "course": "Teaching experience 1",
-      "institution": "University 1, Department",
-      "date": "2014-01-01",
-      "role": "Undergraduate course",
-      "description": ""
-    },
-    {
-      "course": "Teaching experience 2",
-      "institution": "University 1, Department",
-      "date": "2015-01-01",
-      "role": "Workshop",
-      "description": ""
-    }
-  ],
-  "portfolio": [
-    {
-      "name": "Portfolio item number 1",
-      "category": "portfolio",
-      "date": "",
-      "url": "",
-      "description": "Short description of portfolio item number 1<br/><img src='/images/500x300.png'>"
-    }
-  ]
+  "publications": [],
+  "presentations": [],
+  "teaching": [],
+  "portfolio": []
 }

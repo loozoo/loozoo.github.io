@@ -175,12 +175,11 @@
 .greedy-nav {
   position: relative;
   min-width: 250px;
-  background: var(--global-bg-color);
 
   a {
     display: block;
     margin: 0 1rem;
-    padding: 0.5rem 0;
+    padding: 0.35rem 0;
     color: var(--global-masthead-link-color);
     text-decoration: none;
 
@@ -231,6 +230,17 @@
         display: flex;
         justify-content: center;
         cursor: pointer;
+        transition: transform 0.15s ease;
+
+        // This icon is a standalone toggle, not a navigational link —
+        // skip the underline-reveal every other nav item gets on hover.
+        &::before {
+          display: none;
+        }
+
+        &:active {
+          transform: scale(0.88);
+        }
       }
     }
 
@@ -238,8 +248,8 @@
       a {
         display: flex;
         align-items: center;
-        padding: 0.5rem 0.75rem;
-        font-size: 1.3rem;
+        padding: 0.35rem 0.75rem;
+        font-size: 1.2rem;
       }
     }
 
@@ -287,7 +297,7 @@
 
       &:hover {
         color: var(--global-masthead-link-color-hover);
-        background: var(--global-border-color);
+        background: var(--global-hover-color);
       }
     }
 
@@ -450,4 +460,34 @@
       display: block;
     }
   }
+}
+
+/*
+   Dark/light mode toggle
+   ========================================================================== */
+
+#theme-icon {
+  padding: 0.4rem;
+  border-radius: 50%;
+  font-size: 0.95rem;
+  color: var(--global-masthead-link-color);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s ease, background-color 0.2s ease;
+
+  // Force a single, consistent glyph (a half-filled circle) regardless of
+  // which of "fa-sun"/"fa-moon" the toggle script applies — a plain sun icon
+  // reads as a gear at this size, this doesn't. The script still needs to
+  // toggle those two classes; this just overrides what glyph they render as.
+  &::before {
+    content: "\f042"; // fa-circle-half-stroke
+  }
+
+  &.fa-moon {
+    color: var(--global-base-color);
+    transform: rotate(180deg);
+  }
+}
+
+#theme-toggle a:hover #theme-icon,
+#theme-toggle a:focus-visible #theme-icon {
+  background-color: var(--global-hover-color);
 }

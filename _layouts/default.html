@@ -5,7 +5,7 @@ layout: compress
 {% include base_path %}
 
 <!doctype html>
-<html lang="{{ site.locale | slice: 0,2 }}" class="no-js"{% if site.site_theme == "dark" %} data-theme="dark"{% endif %}>
+<html lang="{{ site.locale | slice: 0,2 }}" class="no-js"{% if site.default_color_mode == "dark" %} data-theme="dark"{% endif %}>
   <head>
     {% include head.html %}
     {% include head/custom.html %}
@@ -15,6 +15,24 @@ layout: compress
 
     {% include browser-upgrade.html %}
     {% include masthead.html %}
+
+    {% comment %}
+      Shared SVG filter defs live in the persistent shell (outside the Swup
+      content container) so CSS url(#...) references stay valid across in-page
+      navigations. Swapping an inline SVG filter in per-navigation makes
+      Chromium drop the reference and render the filtered element invisible.
+    {% endcomment %}
+    <svg width="0" height="0" style="position: absolute; overflow: hidden;" aria-hidden="true" focusable="false">
+      <defs>
+        <!-- "goo" / metaball filter for the research tab toggle (see /research/) -->
+        <filter id="research-tabs-goo">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="goo-blur" />
+          <feColorMatrix in="goo-blur" mode="matrix"
+            values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo-sharp" />
+          <feComposite in="SourceGraphic" in2="goo-sharp" operator="atop" />
+        </filter>
+      </defs>
+    </svg>
 
     {{ content }}
 

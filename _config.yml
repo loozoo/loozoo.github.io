@@ -9,8 +9,9 @@
 # Basic Site Settings
 locale                   : "en-US"
 site_theme               : "default" # The available themes options are "default", "air", "sunrise", "mint", "dirt" and "contrast"
+default_color_mode       : "dark" # Which mode ("dark" or "light") a first-time visitor sees before they toggle it themselves
 title                    : "Luke Zhu"
-title_separator          : "-"
+title_separator          : "&#124;"
 name                     : &name "Luke Zhu"
 description              : &description "Academic website of Luke Zhu, an undergraduate studying Mathematics and Physics (double) alongside a concurrent Master's in Mathematics at Harvard College"   # Update this with a general description of your site, this is the default if not overridden by a page
 url                      : https://loozoo.github.io # The base hostname & protocol for your site e.g. "https://[your GitHub username].github.io",
@@ -222,6 +223,14 @@ collections:
     output: true
     permalink: /:collection/:path/
 
+# Groups research items on the /research/ page into labeled sections.
+# Set `category:` in a _research item's front matter to one of these keys.
+publication_category:
+  research:
+    title: "Research"
+  writing:
+    title: "Writing & Projects"
+
 
 # These settings control how pages and collections are included in the site
 defaults:
@@ -257,10 +266,7 @@ defaults:
       path: ""
       type: research
     values:
-      layout: single
-      author_profile: true
-      share: true
-      comments: true
+      layout: research-single
   # _talks
   - scope:
       path: ""

@@ -125,7 +125,81 @@
     </ul>
   </div>
   {% endif %}
-  
+
+  {% if cv.awards.size > 0 %}
+  <!-- Awards -->
+  <div class="cv-section">
+    <h2>Honors &amp; Awards</h2>
+    <ul class="cv-list">
+      {% for award in cv.awards %}
+      <li class="cv-item">
+        <div class="cv-item-header">
+          <div class="cv-item-title">{{ award.title }}</div>
+          <div class="cv-item-date">{{ award.date }}</div>
+        </div>
+        <div class="cv-item-content">
+          {% if award.awarder %}
+          <div class="cv-item-subtitle">{{ award.awarder }}</div>
+          {% endif %}
+          {% if award.summary %}
+          <div class="cv-item-detail">{{ award.summary }}</div>
+          {% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  {% if cv.projects.size > 0 %}
+  <!-- Projects and Research -->
+  <div class="cv-section">
+    <h2>Projects &amp; Research</h2>
+    <ul class="cv-list">
+      {% for project in cv.projects %}
+      <li class="cv-item">
+        <div class="cv-item-header">
+          <div class="cv-item-title">{{ project.name }}</div>
+          {% if project.date %}
+          <div class="cv-item-date">{{ project.date }}</div>
+          {% endif %}
+        </div>
+        <div class="cv-item-content">
+          {% if project.description %}
+          <div class="cv-item-detail">{{ project.description }}</div>
+          {% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  {% if cv.volunteer.size > 0 %}
+  <!-- Volunteering -->
+  <div class="cv-section">
+    <h2>Volunteering</h2>
+    <ul class="cv-list">
+      {% for v in cv.volunteer %}
+      <li class="cv-item">
+        <div class="cv-item-header">
+          <div class="cv-item-title">{{ v.position }}</div>
+          {% if v.startDate %}
+          <div class="cv-item-date">{{ v.startDate }}{% if v.endDate %} - {{ v.endDate }}{% endif %}</div>
+          {% endif %}
+        </div>
+        <div class="cv-item-content">
+          <div class="cv-item-subtitle">{{ v.organization }}</div>
+          {% if v.summary %}
+          <div class="cv-item-detail">{{ v.summary }}</div>
+          {% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
   {% if cv.skills.size > 0 %}
   <!-- Skills -->
   <div class="cv-section">

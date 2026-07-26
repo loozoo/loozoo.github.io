@@ -3,26 +3,26 @@
     ========================================================================== */
 
 /* Color codes used for the theme */
-$primary-color              : #0ea1c5;
-$gray                       : #7a8288;
+$primary-color              : rgb(222, 138, 13);
+$gray                       : #8f8880;
 $dark-gray                  : mix(#000, $gray, 40%);
 $darker-gray                : mix(#000, $gray, 60%);
 $light-gray                 : mix(#fff, $gray, 50%);
 
-$background                 : #474747;
-$background-light           : mix(#fff, $background, 80%);
-$background-lighter         : mix(#fff, $background, 90%);
-$text                       : #ffffff;
-$link                       : #0ea1c5;
-$link-dark                  : mix(#000, $link, 25%);
-$link-light                 : mix(#fff, $link, 25%);
+$background                 : rgb(21, 20, 19);
+$background-light           : mix(#fff, $background, 12%);
+$background-lighter         : mix(#fff, $background, 22%);
+$text                       : #ece7df;
+$link                       : $primary-color;
+$link-dark                  : mix(#fff, $link, 20%);
+$link-light                 : mix(#000, $link, 20%);
 
 /* Color codes used for the site */
-$danger-color               : #ee5f5b;
-$info-color                 : #2f7f93;
-$notice-color               : #7a8288;
-$success-color              : #62c462;
-$warning-color              : #f89406;
+$danger-color               : #e5484d;
+$info-color                 : #5b9bd5;
+$notice-color               : $gray;
+$success-color              : #6fbf73;
+$warning-color              : #e8b93d;
 
 /* Other basic settings for the template */
 $border-radius              : 4px;
@@ -50,7 +50,19 @@ html[data-theme="dark"] {
     --global-masthead-link-color        : #{$text};
     --global-masthead-link-color-hover  : #{$primary-color};
     --global-text-color                 : #{$text};
-    --global-text-color-light           : #f3f3f3;
+    --global-text-color-light           : #{mix(#000, $text, 8%)};
     --global-thead-color                : #{$background-lighter};
+    --global-hover-color                : rgba(255, 255, 255, 0.08);
+}
+
+/* Text selection highlight uses the accent color in dark mode */
+html[data-theme="dark"] ::selection {
+    background: var(--global-base-color);
+    color: var(--global-bg-color);
+}
+
+html[data-theme="dark"] ::-moz-selection {
+    background: var(--global-base-color);
+    color: var(--global-bg-color);
 }
 

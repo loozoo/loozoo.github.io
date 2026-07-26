@@ -1,0 +1,23 @@
+<div class="teaching-item">
+  <h3 class="teaching-item__title">{{ post.title | markdownify | remove: "<p>" | remove: "</p>" }}</h3>
+
+  {% if post.date_note or post.date or post.type or post.venue or post.tags.size > 0 %}
+    <p class="teaching-item__meta">
+      {% if post.date_note %}
+        <span class="teaching-item__date">{{ post.date_note }}</span>
+      {% elsif post.date %}
+        <span class="teaching-item__date">{{ post.date | date: "%Y" }}</span>
+      {% endif %}
+      {% if post.venue %}<span class="teaching-item__where">{{ post.venue }}{% if post.location %}, {{ post.location }}{% endif %}</span>{% endif %}
+      {% if post.type %}<span class="teaching-item__tag">{{ post.type }}</span>{% endif %}
+      {% for tag in post.tags %}<span class="teaching-item__tag">{{ tag }}</span>{% endfor %}
+    </p>
+  {% endif %}
+
+  {% assign description = post.description | default: post.content %}
+  {% if description != "" %}
+    <div class="teaching-item__description">
+      {% if post.description %}{{ post.description | markdownify }}{% else %}{{ post.content }}{% endif %}
+    </div>
+  {% endif %}
+</div>

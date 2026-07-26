@@ -1,0 +1,80 @@
+/* ==========================================================================
+   TEACHING LIST
+   ========================================================================== */
+
+// Scale every teaching item's title/description text by adjusting these.
+$teaching-title-font-size: 1.1em;
+$teaching-description-font-size: 0.85em;
+
+.teaching-list {
+  margin-bottom: 2em;
+}
+
+.teaching-item {
+  padding: 1.5em 1.75em;
+  margin-bottom: 1.25em;
+  border: 1px solid var(--global-border-color);
+  border-radius: $border-radius;
+  background: var(--global-bg-color);
+  box-shadow: $box-shadow;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.teaching-item__title {
+  margin: 0 0 0.4em;
+  font-size: $teaching-title-font-size;
+  line-height: 1.3;
+  color: var(--global-text-color);
+}
+
+.teaching-item__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5em;
+  margin: 0 0 0.9em;
+  font-family: $sans-serif;
+  font-size: $type-size-6;
+}
+
+.teaching-item__date {
+  color: var(--global-text-color);
+  opacity: 0.6;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.teaching-item__tag {
+  display: inline-block;
+  padding: 0.2em 0.75em;
+  border-radius: 2em;
+  background: var(--global-base-color);
+  color: #fff;
+  opacity: 0.85;
+  font-size: $type-size-7;
+  letter-spacing: 0.02em;
+}
+
+.teaching-item__where {
+  color: var(--global-text-color);
+  opacity: 0.65;
+  font-style: italic;
+}
+
+.teaching-item__description {
+  color: var(--global-text-color);
+  opacity: 0.85;
+  font-size: $teaching-description-font-size;
+  line-height: 1.6;
+
+  p {
+    margin: 0;
+  }
+
+  p + p {
+    margin-top: 0.75em;
+  }
+}

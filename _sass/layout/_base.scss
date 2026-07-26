@@ -116,7 +116,10 @@ blockquote {
 /* links */
 
 a {
-  &:focus {
+  /* Keyboard-only focus ring: `:focus-visible` keeps the outline for Tab
+     navigation but not after a mouse click, so clicking a link/heading/icon
+     doesn't leave a lingering highlighted box. */
+  &:focus-visible {
     @extend %tab-focus;
   }
 

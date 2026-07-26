@@ -1,0 +1,93 @@
+{% comment %}
+  Smooth in-page navigation via Swup (https://swup.js.org).
+
+  Only #page-content is swapped between pages, so the masthead and sidebar DOM
+  stay mounted (they never blink or reload). Links are preloaded on hover for a
+  near-instant swap, covered by a short opacity fade (see _sass/layout/_swup.scss).
+
+  Progressive enhancement: this is a module script, so legacy browsers skip it;
+  if the CDN import fails, the catch leaves every link as a normal full-page load.
+  Swup only initializes on pages that actually have the #page-content container
+  (the shared masthead + sidebar shell), so sidebar-less layouts fall back too.
+{% endcomment %}
+<script type="module">
+  (async function () {
+    // Bail out (leaving normal navigation) if this page isn't part of the
+    // shared shell that owns #page-content.
+    if (!document.getElementById('page-content')) {
+      return;
+    }
+
+    let Swup, SwupPreloadPlugin;
+    try {
+      [{ default: Swup }, { default: SwupPreloadPlugin }] = await Promise.all([
+        import('https://cdn.jsdelivr.net/npm/swup@4/+esm'),
+        import('https://cdn.jsdelivr.net/npm/@swup/preload-plugin@3/+esm')
+      ]);
+    } catch (err) {
+      // CDN unavailable — links keep working as ordinary full-page loads.
+      return;
+    }
+
+    const swup = new Swup({
+      containers: ['#page-content'],
+      animationSelector: '#page-content',
+      linkToSelf: 'navigate',
+      plugins: [new SwupPreloadPlugin({ preloadHoveredLinks: true })],
+      // Skip Swup for downloads/assets (anything with a non-.html file
+      // extension) and any link explicitly opted out with data-no-swup.
+      ignoreVisit: function (url, opts) {
+        const el = opts && opts.el;
+        if (el && el.hasAttribute('data-no-swup')) {
+          return true;
+        }
+        return /\.[a-z0-9]{1,8}(\?|#|$)/i.test(url) && !/\.html?(\?|#|$)/i.test(url);
+      }
+    });
+
+    // Reflect the current page in the persistent masthead (it isn't swapped, so
+    // the server-rendered `selected` class would otherwise go stale). Mirrors
+    // the Liquid rule in _includes/masthead.html.
+    function updateActiveNav() {
+      const path = window.location.pathname;
+      document.querySelectorAll('#site-nav .masthead__menu-item').forEach(function (li) {
+        if (li.id === 'theme-toggle') {
+          return;
+        }
+        if (li.id === 'site-home') {
+          li.classList.toggle('selected', path === '/' || path === '/index.html');
+          return;
+        }
+        const a = li.querySelector('a[href]');
+        if (!a) {
+          return;
+        }
+        const linkPath = new URL(a.href, window.location.origin).pathname;
+        if (linkPath === '/') {
+          return;
+        }
+        li.classList.toggle('selected', path.indexOf(linkPath) === 0);
+      });
+    }
+
+    // After each swap: re-run per-page setup, fix the active nav link, count the
+    // virtual pageview in GoatCounter, and scroll to top on forward navigations.
+    swup.hooks.on('page:view', function (visit) {
+      if (window.AP && typeof window.AP.initPage === 'function') {
+        window.AP.initPage();
+      }
+      updateActiveNav();
+
+      if (window.goatcounter && typeof window.goatcounter.count === 'function') {
+        window.goatcounter.count({
+          path: location.pathname + location.search + location.hash
+        });
+      }
+
+      const isPopstate = visit && visit.history && visit.history.popstate;
+      if (!isPopstate) {
+        window.scrollTo(0, 0);
+      }
+    });
+  })();
+</script>

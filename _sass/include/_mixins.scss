@@ -18,6 +18,40 @@
   @return ($target / $context) * 1em;
 }
 
+/*
+   Crosshatch texture
+   ========================================================================== */
+
+/*
+  A light diagonal crosshatch, layered as a background-image so it sits on
+  top of whatever background-color/background is already set. Include this
+  AFTER the element's own background declaration, since the `background`
+  shorthand resets background-image to none.
+
+  Lines are drawn as a soft ramp (transparent -> color -> transparent) rather
+  than a hard-edged band, so it reads as a faint texture instead of a crisp
+  technical-drawing grid.
+*/
+@mixin crosshatch($color: var(--global-border-color), $opacity: 6%, $size: 8px, $line-width: 3px) {
+  $c: color-mix(in srgb, #{$color} #{$opacity}, transparent);
+  $half: calc(#{$size} / 2);
+  $edge: calc(#{$line-width} / 2);
+
+  background-image:
+    repeating-linear-gradient(45deg,
+      transparent 0,
+      transparent calc(#{$half} - #{$edge}),
+      #{$c} #{$half},
+      transparent calc(#{$half} + #{$edge}),
+      transparent #{$size}),
+    repeating-linear-gradient(-45deg,
+      transparent 0,
+      transparent calc(#{$half} - #{$edge}),
+      #{$c} #{$half},
+      transparent calc(#{$half} + #{$edge}),
+      transparent #{$size});
+}
+
 
 /*
    Bourbon clearfix

@@ -4,7 +4,6 @@
 
 .masthead {
   position: fixed;
-  background: var(--global-bg-color);
   height: fit-content;
   top: 0;
   width: 100%;
@@ -14,6 +13,12 @@
   -webkit-animation-delay: 0.15s;
           animation-delay: 0.15s;
   z-index: 20;
+
+  /* One uniform full-width surface, mirroring the footer: a solid background
+     with the crosshatch texture layered on top, spanning the entire page
+     width so the bar reads as part of the page rather than a floating chip. */
+  background-color: var(--global-bg-color);
+  @include crosshatch;
 
   &::after {
     content: "";
@@ -27,7 +32,7 @@
   &__inner-wrap {
     @include container;
     @include clearfix;
-    padding: 0.5em 1em;
+    padding: 0.25em 1em;
     font-family: $sans-serif-narrow;
 
     @include breakpoint($x-large) {
@@ -55,7 +60,7 @@
 }
 
 .masthead__menu-item {
-  background-color: var(--global-bg-color);
+  background-color: transparent;
   display: block;
   list-style-type: none;
   white-space: nowrap;
