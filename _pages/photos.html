@@ -11,8 +11,9 @@ author_profile: true
 
 <div class="photo-grid">
 {% for file in photo_files %}
+  {% assign thumb_path = file.path | replace: '/images/photos/', '/images/photos-thumb/' %}
   <a href="{{ file.path | prepend: base_path }}" class="photo-grid__item">
-    <img src="{{ file.path | prepend: base_path }}" alt="" loading="lazy">
+    <img src="{{ thumb_path | prepend: base_path }}" alt="" loading="lazy">
   </a>
 {% endfor %}
 </div>

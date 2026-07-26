@@ -1,0 +1,39 @@
+name: Generate photo thumbnails
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'images/photos/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: photo-thumbnails-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  thumbnails:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Pillow
+        run: pip install Pillow
+
+      - name: Generate thumbnails
+        run: python scripts/generate_photo_thumbnails.py
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add images/photos-thumb scripts/.thumbnail-manifest.json
+          git commit -m "Automated: regenerate photo thumbnails" || echo "No changes to commit"
+          git push
