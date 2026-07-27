@@ -69,18 +69,46 @@
     padding-right: 2em;
     font-weight: 700;
   }
+
+  /* Reserve each item's BOLD footprint up front: a zero-height, hidden copy of
+     the label (from data-title) rendered at bold weight forces the table-cell
+     to always be as wide as the bold text. So when the selected item switches
+     to real `font-weight: 700` below, its cell doesn't grow and nothing after
+     it (e.g. the theme-toggle icon) shifts. */
+  &[data-title]::after {
+    content: attr(data-title);
+    display: block;
+    height: 0;
+    overflow: hidden;
+    font-weight: 700;
+    visibility: hidden;
+    pointer-events: none;
+  }
 }
 
 .masthead__menu-item.selected a {
   color: var(--global-text-color);
+  /* Real bold — the width it adds is already reserved by the [data-title]
+     rule above, so this emphasizes the label without moving anything. */
   font-weight: 700;
-  border-bottom: 2px solid var(--global-text-color);
   pointer-events: none; /* Move this here */
   cursor: default; /* Move this here too */
 }
 
-.masthead__menu-item.selected a:hover {
-  color: var(--global-text-color);
-  border-bottom: 2px solid var(--global-text-color);
-  /* No need to repeat pointer-events and cursor here */
+/* The selected underline is its OWN bar (`::after`), sitting at the exact same
+   spot as the hover bar (`::before` in _navigation.scss) so it never moves
+   vertically. Crucially it has NO transition: it snaps in/out instead of
+   animating, so navigating away doesn't collapse the outgoing page's underline
+   into itself. Being a solid full-width bar, it also masks the hover `::before`
+   collapsing on the just-clicked item (pointer-events: none ends its :hover).
+   `.greedy-nav` prefix keeps specificity above the base `a` rules in
+   _navigation.scss, which is imported after this file. */
+.greedy-nav .masthead__menu-item.selected a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 100%;
+  background: var(--global-text-color);
 }

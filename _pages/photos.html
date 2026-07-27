@@ -8,12 +8,24 @@ author_profile: true
 {% include base_path %}
 
 {% assign photo_files = site.static_files | where_exp: "file", "file.path contains '/images/photos/'" | sort: "name" %}
+{% assign photos_data = site.data.photos %}
 
 <div class="photo-grid">
 {% for file in photo_files %}
+  {% assign meta = photos_data[file.name] %}
   {% assign thumb_path = file.path | replace: '/images/photos/', '/images/photos-thumb/' %}
-  <a href="{{ file.path | relative_url }}" class="photo-grid__item">
-    <img src="{{ thumb_path | relative_url }}" alt="" loading="lazy">
+  <a href="{{ file.path | relative_url }}"
+     class="photo-grid__item"
+     data-caption="{{ meta.caption | escape }}"
+     data-location="{{ meta.location | escape }}"
+     data-date="{{ meta.date | escape }}">
+    <img src="{{ thumb_path | relative_url }}" alt="{{ meta.caption | escape }}" loading="lazy">
+    {% if meta.caption or meta.location %}
+    <span class="photo-grid__caption">
+      {% if meta.caption %}{{ meta.caption }}{% endif %}
+      {% if meta.location %}<span class="photo-grid__location">{{ meta.location }}</span>{% endif %}
+    </span>
+    {% endif %}
   </a>
 {% endfor %}
 </div>
@@ -22,11 +34,39 @@ author_profile: true
   <span class="lightbox-overlay__close" aria-label="Close">&times;</span>
   <span class="lightbox-overlay__prev" aria-label="Previous photo">&#10094;</span>
   <img class="lightbox-overlay__img" src="" alt="">
+  <div class="lightbox-overlay__caption">
+    <span class="lightbox-overlay__caption-text"></span>
+    <span class="lightbox-overlay__caption-location"></span>
+    <span class="lightbox-overlay__caption-date"></span>
+  </div>
   <span class="lightbox-overlay__next" aria-label="Next photo">&#10095;</span>
 </div>
 
-{% comment %}
-  The lightbox behavior lives in assets/js/_main.js (initPhotoLightbox), so it is
-  re-initialized after in-page Swup navigations. See _includes/swup.html.
-{% endcomment %}
+{% assign map_points = photo_files | where_exp: "file", "site.data.photos[file.name].lat" | where_exp: "file", "site.data.photos[file.name].lng" %}
+{% if map_points.size > 0 %}
+<h2 class="photo-map__heading">Photo Map</h2>
+<div id="photo-map" class="photo-map"></div>
+<script type="application/json" id="photo-map-data">
+[
+{% for file in map_points %}
+  {% assign meta = photos_data[file.name] %}
+  {% assign thumb_path = file.path | replace: '/images/photos/', '/images/photos-thumb/' %}
+  {
+    "thumb": {{ thumb_path | relative_url | jsonify }},
+    "full": {{ file.path | relative_url | jsonify }},
+    "caption": {{ meta.caption | jsonify }},
+    "location": {{ meta.location | jsonify }},
+    "date": {{ meta.date | jsonify }},
+    "lat": {{ meta.lat }},
+    "lng": {{ meta.lng }}
+  }{% unless forloop.last %},{% endunless %}
+{% endfor %}
+]
+</script>
+{% endif %}
 
+{% comment %}
+  The lightbox + map behavior lives in assets/js/_main.js (initPhotoLightbox,
+  initPhotoMap), so it is re-initialized after in-page Swup navigations.
+  See _includes/swup.html.
+{% endcomment %}

@@ -1,0 +1,79 @@
+/* ==========================================================================
+   READ MORE — collapsible descriptions for research/teaching cards
+   ========================================================================== */
+
+// Injected by initReadMore() in assets/js/_main.js, only for cards whose
+// description actually overflows the collapsed height. Short descriptions are
+// left completely untouched (no header wrapper, no chevron).
+
+.read-more {
+  position: relative;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+
+.read-more.is-collapsed::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2.4em;
+  background: linear-gradient(to bottom, transparent, var(--global-bg-color));
+  pointer-events: none;
+}
+
+// Wraps the card's title + meta line into one full-bleed click/keyboard
+// target (edge to edge with the card) that expands/collapses the description.
+.read-more-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75em;
+  margin: -1.5em -1.75em 0;
+  padding: 1.5em 1.75em 0;
+  border-radius: $border-radius $border-radius 0 0;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid var(--global-base-color);
+    outline-offset: -2px;
+  }
+}
+
+.read-more-header__text {
+  min-width: 0;
+}
+
+.read-more-header__chevron {
+  position: relative;
+  // Sized and nudged as a % of the card's own width (via `container-type:
+  // inline-size` on .research-item/.teaching-item), not a fixed em — so the
+  // chevron reads the same size whether the card is full-width (/research/)
+  // or narrower (e.g. the homepage teaser), instead of looming larger in a
+  // narrower card. Percentages below are 27px/-12px measured against a
+  // 980px-wide card.
+  top: -1.22cqi;
+  flex: none;
+  align-self: center;
+  color: var(--global-base-color);
+  line-height: 0;
+  transition: transform 0.25s ease;
+
+  svg {
+    display: block;
+    width: 2.75cqi;
+    height: auto;
+  }
+}
+
+.read-more-header[aria-expanded="true"] .read-more-header__chevron {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .read-more,
+  .read-more-header__chevron {
+    transition: none;
+  }
+}

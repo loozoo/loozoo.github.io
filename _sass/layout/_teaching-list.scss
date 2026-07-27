@@ -17,6 +17,10 @@ $teaching-description-font-size: 0.85em;
   border-radius: $border-radius;
   background: var(--global-bg-color);
   box-shadow: $box-shadow;
+  // Lets the read-more chevron (see _read-more.scss) size itself as a
+  // percentage of this card's own width, so it reads the same whether the
+  // card is full-width (/research/) or narrower (e.g. a homepage teaser).
+  container-type: inline-size;
 
   &:last-child {
     margin-bottom: 0;
@@ -30,7 +34,11 @@ $teaching-description-font-size: 0.85em;
   color: var(--global-text-color);
 }
 
-.teaching-item__meta {
+// Qualified with `.teaching-item` so this beats `.page__content p, li, dl {
+// font-size: 1em; }` on specificity — see the matching comment in
+// _research-list.scss for why (a <p> reused inside a `single`-layout page
+// otherwise gets its font-size silently overridden back to full size).
+.teaching-item .teaching-item__meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;

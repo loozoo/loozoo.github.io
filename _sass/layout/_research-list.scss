@@ -117,6 +117,10 @@ $research-description-font-size: 0.85em;
   border-radius: $border-radius;
   background: var(--global-bg-color);
   box-shadow: $box-shadow;
+  // Lets the read-more chevron (see _read-more.scss) size itself as a
+  // percentage of this card's own width, so it reads the same whether the
+  // card is full-width (/research/) or narrower (the homepage teaser).
+  container-type: inline-size;
 
   &:last-child {
     margin-bottom: 0;
@@ -130,7 +134,12 @@ $research-description-font-size: 0.85em;
   color: var(--global-text-color);
 }
 
-.research-item__meta {
+// Qualified with `.research-item` so this beats `.page__content p, li, dl {
+// font-size: 1em; }` on specificity — this is a <p>, and without the extra
+// class that page-content rule silently wins when the card is reused inside
+// a `single`-layout page (e.g. the homepage teaser), inflating the meta row
+// (and everything in em under it — tags, padding) back to full size.
+.research-item .research-item__meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;

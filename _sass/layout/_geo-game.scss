@@ -1,0 +1,331 @@
+/* ==========================================================================
+   GEOGUESSR-STYLE PHOTO GAME (homepage)
+   ========================================================================== */
+
+.geo-game {
+  margin: 2.5em 0;
+}
+
+// The `.btn` class sets an explicit `display`, which would otherwise override
+// the plain `hidden` attribute used to toggle the buttons/panels below.
+.geo-game [hidden] {
+  display: none !important;
+}
+
+.geo-game__intro {
+  margin-bottom: 1em;
+}
+
+.geo-game__title {
+  margin: 0 0 0.25em;
+}
+
+.geo-game__subtitle {
+  margin: 0;
+  color: var(--global-text-color-light);
+  font-size: 0.9rem;
+}
+
+// Stacked on narrow screens; photo + controls beside the map on wider ones,
+// with both columns sized to the same height so the whole game stays compact.
+.geo-game__board {
+  display: grid;
+  gap: 0.9em;
+  grid-template-columns: 1fr;
+
+  @include breakpoint($medium) {
+    grid-template-columns: clamp(200px, 34%, 280px) 1fr;
+    align-items: stretch;
+  }
+}
+
+// Left column: the photo clue on top, score/result/buttons beneath it.
+.geo-game__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7em;
+
+  @include breakpoint($medium) {
+    height: 340px; // matches .geo-game__map so the columns line up
+  }
+}
+
+/* The photo clue. A small fixed square on narrow screens so it reads as a
+   clue thumbnail rather than a stretched banner; on wider screens it fills
+   the panel and grows to take the leftover height above the controls. */
+.geo-game__photo {
+  // Reset the theme's generic `figure` rule (display: flex + wrapping),
+  // which would otherwise let the image's leftover margin-bottom (below)
+  // inflate this box past the image and throw off the caption's anchor.
+  display: block;
+  position: relative;
+  margin: 0;
+  width: 130px;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
+
+  @include breakpoint($medium) {
+    width: auto;
+    aspect-ratio: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  // Only clickable-looking once a guess has been submitted and the photo is
+  // revealed -- see initGeoGame()'s `is-viewable` toggle in _main.js.
+  &.is-viewable .geo-game__photo-img {
+    cursor: zoom-in;
+  }
+}
+
+.geo-game__photo-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  margin: 0; // theme's `figure img` rule adds margin-bottom otherwise
+}
+
+/* Name + place revealed over the photo after a guess, mirroring the bottom
+   gradient caption used on the gallery grid (.photo-grid__caption). */
+.geo-game__photo-caption {
+  position: absolute;
+  inset: auto 0 0 0;
+  // Reset the theme's base `figcaption` rule: its `margin-bottom: 0.5em` would
+  // otherwise push this absolutely-positioned (bottom: 0) caption ~0.5em UP off
+  // the photo's bottom edge, and its caption font/colour would leak in too.
+  margin: 0;
+  padding: 1.6em 0.7em 0.45em;
+  background: linear-gradient(to top, rgba(#000, 0.82), rgba(#000, 0));
+  color: #fff;
+  font-family: $global-font-family;
+  font-size: 0.8rem;
+  line-height: 1.25;
+  text-shadow: 0 1px 2px rgba(#000, 0.6);
+  animation: geo-game-caption-in 0.25s ease both;
+}
+
+@keyframes geo-game-caption-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.geo-game__photo-name {
+  display: block;
+  font-weight: 600;
+}
+
+.geo-game__photo-place {
+  display: block;
+  font-size: 0.72rem;
+  opacity: 0.85;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.geo-game__map-wrap {
+  position: relative;
+}
+
+.geo-game__map {
+  height: 300px;
+  border: 1px solid var(--global-border-color);
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
+  overflow: hidden;
+  cursor: crosshair;
+
+  @include breakpoint($medium) {
+    height: 340px;
+  }
+
+  // Match the muted CARTO basemap styling used by the photo map.
+  .leaflet-container {
+    font-family: $global-font-family;
+    background: var(--global-bg-color);
+  }
+
+  .leaflet-control-zoom {
+    border: 1px solid var(--global-border-color) !important;
+    box-shadow: $box-shadow !important;
+
+    a {
+      background: var(--global-bg-color);
+      color: var(--global-text-color);
+
+      &:hover {
+        background: var(--global-hover-color);
+      }
+    }
+  }
+
+  .leaflet-control-attribution {
+    background: var(--global-bg-color) !important;
+    color: var(--global-text-color-light);
+    font-size: 0.7rem;
+    opacity: 0.85;
+
+    a {
+      color: inherit;
+    }
+  }
+
+  .leaflet-popup-content-wrapper {
+    border: 1px solid var(--global-border-color);
+    border-radius: $border-radius;
+    background: var(--global-bg-color);
+    color: var(--global-text-color);
+    box-shadow: $box-shadow;
+  }
+
+  .leaflet-popup-tip {
+    background: var(--global-bg-color);
+    box-shadow: none;
+  }
+
+  .leaflet-popup-content {
+    margin: 0.75em;
+  }
+}
+
+.geo-game__map-hint {
+  position: absolute;
+  top: 0.75em;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  padding: 0.4em 0.9em;
+  border-radius: 2em;
+  background: rgba(#000, 0.75);
+  color: #fff;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+
+  &.is-hidden {
+    opacity: 0;
+  }
+}
+
+/* Guess / actual pins. Reuse the small filled-dot idiom from the photo map. */
+.geo-game__pin-dot {
+  display: block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--global-bg-color);
+  box-shadow: 0 1px 4px rgba(#000, 0.4);
+}
+
+.geo-game__pin--guess .geo-game__pin-dot {
+  background: var(--global-base-color);
+}
+
+.geo-game__pin--actual .geo-game__pin-dot {
+  background: #e0532f; // warm accent to read as "the real spot"
+}
+
+.geo-game__line {
+  stroke: var(--global-text-color-light);
+  stroke-width: 2;
+  opacity: 0.8;
+}
+
+// Mobile: a single wrapping row (status left, buttons right). Desktop: a
+// vertical stack in the narrow column, with the buttons pinned to the bottom.
+.geo-game__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6em 1.25em;
+
+  @include breakpoint($medium) {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 0.5em;
+    flex: 0 0 auto; // content-sized; the photo above takes the leftover height
+  }
+}
+
+.geo-game__status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35em 1em;
+  font-size: 0.9rem;
+}
+
+.geo-game__round {
+  font-weight: 600;
+}
+
+.geo-game__score {
+  color: var(--global-text-color-light);
+}
+
+// This session's local best, revealed under the current score once the
+// player has completed a full game (see updateBestDisplay() in _main.js).
+.geo-game__best {
+  flex: 1 1 100%; // mobile: own full-width row, directly under round/score
+  font-size: 0.65rem;
+  color: var(--global-text-color-light);
+  opacity: 0.75;
+
+  @include breakpoint($medium) {
+    flex: 0 0 auto;
+    margin-top: -0.35em; // sit close under .geo-game__status, not the bar's full gap
+  }
+}
+
+.geo-game__result {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  align-items: baseline;
+  font-size: 0.9rem;
+  min-height: 1.25em; // reserve the line before a guess so nothing reflows
+}
+
+.geo-game__distance {
+  font-weight: 600;
+}
+
+.geo-game__place {
+  color: var(--global-text-color-light);
+}
+
+// A single full-width button that reads as the primary action and stays put
+// as it swaps between "Guess" and "Next" — symmetric under the photo/controls.
+.geo-game__actions {
+  flex: 1 1 100%; // mobile: the button gets its own full-width row
+
+  @include breakpoint($medium) {
+    flex: 0 0 auto;
+    margin-top: auto; // pin to the bottom of the panel
+  }
+
+  .btn {
+    display: block;
+    width: 100%;
+    margin: 0;
+    text-align: center;
+  }
+}
+
+.geo-game__final {
+  padding: 1.5em;
+  text-align: center;
+  border: 1px solid var(--global-border-color);
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
+}
+
+.geo-game__final-text {
+  margin: 0 0 1em;
+  font-size: 1.05rem;
+}

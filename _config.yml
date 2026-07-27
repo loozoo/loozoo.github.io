@@ -30,6 +30,7 @@ author:
   bio              : "" # bio here
   location         : 
   employer         : "Harvard College"
+  employer_url     : "https://college.harvard.edu/"
   uri              : # URL
   email            : "lukegzhu@gmail.com" 
 

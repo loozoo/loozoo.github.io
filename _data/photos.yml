@@ -1,0 +1,179 @@
+# Per-photo metadata for the gallery/map on /photos/.
+# `date` and `lat`/`lng` are auto-filled from EXIF by
+# scripts/generate_photo_thumbnails.py (only when unset -- edits here are
+# preserved). `caption` and `location` are always written by hand.
+
+20260318_151038.jpg:
+  caption: Vines
+  date: '2026-03-18'
+  lat: 48.6360
+  lng: -1.511400
+  location: Mont Saint-Michel
+20260327_155905.jpg:
+  caption: O partigiano
+  date: '2026-03-27'
+  lat: 45.886087
+  lng: 8.535315
+  location: Stresa
+20260330_130902(1).jpg:
+  caption: The Valley
+  date: '2026-03-30'
+  lat: 46.572959
+  lng: 7.906625
+  location: Lauterbrunnen
+20260331_153230(0)(1).jpg:
+  caption: Train
+  date: '2026-03-31'
+  lat: 46.622926
+  lng: 8.022584
+  location: Grindelwald 
+20260331_173121.jpg:
+  caption: From the Gletscherschlucht
+  date: '2026-03-31'
+  lat: 46.613586
+  lng: 8.046365
+  location: Grindelwald
+20260401_121450.jpg:
+  caption: A peek at Thunersee
+  date: '2026-04-01'
+  lat: 46.683261
+  lng: 7.805842
+  location: Lake Thun
+20260401_125252.jpg:
+  caption: Winding roads 
+  date: '2026-04-01'
+  lat: 46.688991
+  lng: 7.743807
+  location: Lake Thun
+20260403_133611.jpg:
+  caption: A view from Hafelekarspitze 
+  date: '2026-04-03'
+  lat: 47.312840
+  lng: 11.386266
+  location: Innsbruck
+20260406_133029(0)(1).jpg:
+  caption: The shores of Bled
+  date: '2026-04-06'
+  lat: 46.359018
+  lng: 14.085474
+  location: Lake Bled
+20260406_143154.jpg:
+  caption: Hvala, Velika Osojnica!
+  date: '2026-04-06'
+  lat: 46.356999
+  lng: 14.075369
+  location: Lake Bled
+20260407_162125(1).jpg:
+  caption: Ramo Arnaldi
+  date: '2026-04-07'
+  lat: 45.436347
+  lng: 12.323424
+  location: Venezia
+20260408_192059.jpg:
+  caption: Sunset in Venezia
+  date: '2026-04-08'
+  lat: 45.430322
+  lng: 12.354284
+  location: Venezia
+20260429_173500(1).jpg:
+  caption: Spring on the Thames
+  date: '2026-04-29'
+  lat: 51.762500
+  lng: -1.279271
+  location: Fiddler's Island
+20260501_153606(1)(1).jpg:
+  caption: Cows in a Meadow
+  date: '2026-05-01'
+  lat: 51.762409
+  lng: -1.278265
+  location: Port Meadow
+20260510_163728(2).jpg:
+  caption: Across, where I once was
+  date: '2026-05-10'
+  lat: 51.774576
+  lng: -1.294496
+  location: Godstow
+20260527_203216(1).jpg:
+  caption: Second Quad
+  date: '2026-05-27'
+  lat: 51.752194
+  lng: -1.253698
+  location: Oriel College
+20260529_160728.jpg:
+  caption: Stairway to...
+  date: '2026-05-29'
+  lat: 51.725417
+  lng: -1.241950
+  location: On the A423
+20260608_170754.jpg:
+  caption: A portal?
+  date: '2026-06-08'
+  lat: 51.765663
+  lng: -1.282147
+  location: Binsey
+20260612_203120(1).jpg:
+  caption: 
+  date: '2026-06-12'
+  lat: 51.751199
+  lng: -1.253084
+  location: Merton College
+20260617_105204.jpg:
+  caption: Maglev at Longyang
+  date: '2026-06-17'
+  lat: 31.202509
+  lng: 121.559523
+  location: Longyang Station
+20260618_113811(1).jpg:
+  caption: End of the Rainbow
+  date: '2026-06-18'
+  lat: -37.009711
+  lng: 174.783229
+  location: Auckland
+20260629_133745.jpg:
+  caption: What lies ahead
+  date: '2026-06-29'
+  lat: -43.339146
+  lng: 171.514814
+  location: Algidus Rd 
+20260629_150307.jpg:
+  caption: Minecraft
+  date: '2026-06-29'
+  lat: -43.325379
+  lng: 171.509164
+  location: The Overworld
+20260629_154235(1).jpg:
+  caption: Elements
+  date: '2026-06-29'
+  lat: -43.317736
+  lng: 171.491666
+  location: Peak Hill
+20260629_154543(1).jpg:
+  caption: Cloudy Mirror
+  date: '2026-06-29'
+  lat: -43.316111
+  lng: 171.488604
+  location: Lake Coleridge
+20260629_155820(2).jpg:
+  caption: Pre-history
+  date: '2026-06-29'
+  lat: -43.317432
+  lng: 171.491871
+  location: Peak Hill
+20260629_162412(1).jpg:
+  caption: Cloud and Island
+  date: '2026-06-29'
+  lat: -43.315893
+  lng: 171.489261
+  location: Lake Coleridge
+20260629_163917(2).jpg:
+  caption: Braided Monoidal River
+  date: '2026-06-29'
+  lat: -43.340438
+  lng: 171.445109
+  location: Rakaia River
+20260629_183903(1).jpg:
+  caption: Where the sheep sleep
+  date: '2026-06-29'
+  lat: -43.324796
+  lng: 171.488245
+  location: Blackhill Range 
