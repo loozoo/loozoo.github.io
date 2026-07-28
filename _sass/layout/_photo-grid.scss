@@ -69,6 +69,7 @@
   position: fixed;
   inset: 0;
   z-index: 9999;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   background: rgba(#000, 0.9);
@@ -80,7 +81,10 @@
 
   img {
     max-width: 90vw;
-    max-height: 85vh;
+    // Leaves headroom below the image for the caption -- see
+    // .lightbox-overlay__caption, which now sits in normal flow beneath it
+    // rather than pinned to a fixed viewport offset.
+    max-height: 80vh;
     box-shadow: 0 0 30px rgba(#000, 0.5);
   }
 }
@@ -134,10 +138,10 @@
 }
 
 .lightbox-overlay__caption {
-  position: absolute;
-  bottom: 1.25em;
-  left: 50%;
-  transform: translateX(-50%);
+  // In normal flex flow (see .lightbox-overlay) so it always sits a fixed
+  // distance below the image itself, rather than at a fixed viewport offset
+  // that could overlap tall portrait photos.
+  margin-top: 0.85em;
   max-width: 90vw;
   text-align: center;
   color: #fff;
@@ -155,12 +159,17 @@
   font-weight: 600;
 }
 
-.lightbox-overlay__caption-location,
-.lightbox-overlay__caption-date {
+.lightbox-overlay__caption-location {
   display: block;
   font-size: 0.8rem;
   opacity: 0.85;
   margin-top: 0.15em;
+}
+
+// The date is kept in the DOM (see setCaption() in _main.js) but not shown --
+// just not part of the public-facing caption.
+.lightbox-overlay__caption-date {
+  display: none;
 }
 
 // Hide the persistent site footer while a photo is open in the lightbox.

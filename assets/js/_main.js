@@ -356,11 +356,12 @@ function initPhotoLightbox() {
   }
 
   function setCaption(caption, location, rawDate) {
-    var date = formatCaptionDate(rawDate);
+    // The date is kept on the element (not shown -- see .lightbox-overlay__caption-date
+    // in _photo-grid.scss) so it stays out of the visible/empty check below.
     captionText.textContent = caption || "";
     captionLocation.textContent = location || "";
-    captionDate.textContent = date;
-    captionEl.classList.toggle("is-empty", !caption && !location && !date);
+    captionDate.textContent = formatCaptionDate(rawDate);
+    captionEl.classList.toggle("is-empty", !caption && !location);
   }
 
   function updateCaption(item) {
@@ -855,19 +856,21 @@ function initGeoGame() {
     // Opens the full-size photo in the shared lightbox (see initPhotoLightbox),
     // same as clicking a thumbnail on /photos/ -- but as a single photo with
     // no prev/next, since browsing ahead would spoil future rounds' answers.
+    // Before the round is settled, the caption/location/date are withheld
+    // since they'd hand over the answer -- only revealed once guessed.
     function openPhoto(p) {
       var lightbox = window.__photoLightbox;
-      if (lightbox) {
+      if (!lightbox) {
+        return;
+      }
+      if (settled) {
         lightbox.showSinglePhoto(p.full, p.caption, p.location, p.date);
+      } else {
+        lightbox.showSinglePhoto(p.full);
       }
     }
 
-    // Only clickable once the round is settled -- before that there's nothing
-    // revealed yet worth zooming into.
     photoImg.addEventListener("click", function () {
-      if (!settled) {
-        return;
-      }
       openPhoto(rounds[roundIndex]);
     });
 

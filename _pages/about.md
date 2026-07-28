@@ -20,17 +20,12 @@ topological methods for data analysis. I'm also interested in category theory an
 relative algebraic geometry.
 
 
-Outside of this all, I'm the academic lead for [NZPMC](https://www.nzpmc.com/). And away from academic work entirely, I enjoy cycling, [taking photos]({{ "/photos/" | relative_url }}), and Geoguessr/[OSINT](https://osintframework.com/)-style puzzles.
+Outside of this all, I'm the academic lead for [NZPMC](https://www.nzpmc.com/). And away from academic work entirely, I enjoy cycling, [taking photos]({{ "/photos/" | relative_url }}), and Geoguessr/[OSINT](https://osintframework.com/)-style puzzles. If you want to know more about the latter two, have a go at guessing below.
 
 {% assign geo_files = site.static_files | where_exp: "file", "file.path contains '/images/photos/'" | sort: "name" %}
 {% assign geo_points = geo_files | where_exp: "file", "site.data.photos[file.name].lat" | where_exp: "file", "site.data.photos[file.name].lng" %}
 {% if geo_points.size > 1 %}
 <section id="geo-game" class="geo-game" aria-label="Guess where my photos were taken">
-  <div class="geo-game__intro">
-    <h2 class="geo-game__title">Where was this taken?</h2>
-    <p class="geo-game__subtitle"> </p>
-  </div>
-
   <div class="geo-game__board">
     <div class="geo-game__panel">
       <figure class="geo-game__photo">

@@ -12,20 +12,6 @@
   display: none !important;
 }
 
-.geo-game__intro {
-  margin-bottom: 1em;
-}
-
-.geo-game__title {
-  margin: 0 0 0.25em;
-}
-
-.geo-game__subtitle {
-  margin: 0;
-  color: var(--global-text-color-light);
-  font-size: 0.9rem;
-}
-
 // Stacked on narrow screens; photo + controls beside the map on wider ones,
 // with both columns sized to the same height so the whole game stays compact.
 .geo-game__board {
@@ -73,9 +59,9 @@
     min-height: 0;
   }
 
-  // Only clickable-looking once a guess has been submitted and the photo is
-  // revealed -- see initGeoGame()'s `is-viewable` toggle in _main.js.
-  &.is-viewable .geo-game__photo-img {
+  // Always clickable to zoom -- see openPhoto() in _main.js, which withholds
+  // the caption/location/date until the round is settled either way.
+  .geo-game__photo-img {
     cursor: zoom-in;
   }
 }
