@@ -180,12 +180,13 @@ body.lightbox-open .page__footer {
 // #main carries its own stacking context (see the `intro` animation on it in
 // _page.scss), which normally caps it below the masthead's z-index: 20 --
 // otherwise-huge z-indexes nested inside it (like the lightbox overlay's)
-// can't escape that to cover the masthead. Rank it above the masthead only
-// while a photo is open, so the overlay dims the navbar along with everything
-// else instead of leaving it lit up on its own.
-body.lightbox-open #main {
-  position: relative;
-  z-index: 30;
+// can't escape that to cover the masthead. Rank the masthead below instead
+// of promoting #main above it -- promoting the whole #main subtree (tried
+// first) rendered fine in Chromium but left the gallery grid barely dimmed
+// in Firefox, a cross-engine compositing quirk this simpler, one-element
+// rule sidesteps.
+body.lightbox-open .masthead {
+  z-index: -1;
 }
 
 /* ==========================================================================
