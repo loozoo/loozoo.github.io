@@ -1160,6 +1160,22 @@ function bumpIt() {
 }
 
 /* ==========================================================================
+   Assemble the sidebar email link from its two split data attributes (see
+   author-profile.html) so the address never appears intact in the served
+   HTML, only in memory once JS runs.
+   ========================================================================== */
+
+function initEmailLinks() {
+  document.querySelectorAll(".author__email-link").forEach(function (link) {
+    if (link.dataset.mailInit) {
+      return;
+    }
+    link.dataset.mailInit = "1";
+    link.href = "mailto:" + link.dataset.mailA + "@" + link.dataset.mailB;
+  });
+}
+
+/* ==========================================================================
    Per-page initialization — run on first load and again after every
    in-page (Swup) navigation. Kept idempotent so repeated calls are safe.
    ========================================================================== */
@@ -1171,6 +1187,7 @@ function initPage() {
   // rule in _photo-grid.scss) on every page after that until a hard reload.
   document.body.classList.remove("lightbox-open");
 
+  initEmailLinks();
   initResearchTabs();
   initPhotoLightbox();
   initPhotoMap();

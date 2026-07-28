@@ -36,7 +36,14 @@
         <li><a href="{{ author.uri }}"><i class="fas fa-fw fa-link icon-pad-right" aria-hidden="true"></i>{{ site.data.ui-text[site.locale].website_label | default: "Website" }}</a></li>
       {% endif %}
       {% if author.email %}
-        <li><a href="mailto:{{ author.email }}"><i class="fas fa-fw fa-envelope icon-pad-right" aria-hidden="true"></i>{{ site.data.ui-text[site.locale].email_label | default: "Email" }}</a></li>
+        {% assign email_parts = author.email | split: "@" %}
+        {% comment %}
+          The address is split across two data attributes (never adjacent
+          anywhere in the served HTML) and only assembled into a real
+          mailto: link by JS -- see initEmailLinks() in _main.js. Keeps the
+          address off basic HTML/regex scrapers without a visible puzzle.
+        {% endcomment %}
+        <li><a href="#" class="author__email-link" rel="nofollow" data-mail-a="{{ email_parts[0] }}" data-mail-b="{{ email_parts[1] }}"><i class="fas fa-fw fa-envelope icon-pad-right" aria-hidden="true"></i>{{ site.data.ui-text[site.locale].email_label | default: "Email" }}</a></li>
       {% endif %}
 
       <!-- Font Awesome and Academicons icons / Academic websites -->
