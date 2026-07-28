@@ -1165,6 +1165,12 @@ function bumpIt() {
    ========================================================================== */
 
 function initPage() {
+  // #lightbox-overlay lives inside #page-content, so a Swup navigation while
+  // it's open destroys and recreates it -- but <body> isn't swapped, so this
+  // class would otherwise survive and hide the footer (see .page__footer
+  // rule in _photo-grid.scss) on every page after that until a hard reload.
+  document.body.classList.remove("lightbox-open");
+
   initResearchTabs();
   initPhotoLightbox();
   initPhotoMap();
