@@ -10,7 +10,7 @@
   caption: Juice
   date: null
   lat: 37.794788
-  lng: -122.392650
+  lng: -122.39265
   location: Embarcadero, San Francisco
 20260226_135328.jpg:
   caption: Plaza de España
@@ -19,7 +19,7 @@
   lng: -3.712188
   location: Madrid
 20260228_143414.jpg:
-  caption: Institut Verdaguer 
+  caption: Institut Verdaguer
   date: null
   lat: 41.387017
   lng: 2.186776
@@ -51,7 +51,7 @@
 20260322_124712.jpg:
   caption: Via Rialto
   date: null
-  lat: 44.488560
+  lat: 44.48856
   lng: 11.349239
   location: Bologna
 20260323_152738.jpg:
@@ -146,7 +146,7 @@
   caption: Crystal
   date: null
   lat: 46.685342
-  lng: 7.793340
+  lng: 7.79334
   location: Lake Thun
 20260401_121450.jpg:
   caption: A peek at Thunersee
@@ -186,10 +186,10 @@
   lng: 14.085474
   location: Lake Bled
 20260406_133955.jpg:
-  caption: Pletna 
+  caption: Pletna
   date: null
   lat: 46.358312
-  lng: 14.090580
+  lng: 14.09058
   location: Lake Bled
 20260406_143154.jpg:
   caption: Hvala, Velika Osojnica!
@@ -235,7 +235,6 @@
   lng: -1.279271
   location: Fiddler's Island
   visible: false
-  #lightroom version, not as good
 20260501_153606(1)(1).jpg:
   caption: Cows in a Meadow
   date: '2026-05-01'
