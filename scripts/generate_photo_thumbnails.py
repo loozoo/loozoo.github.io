@@ -15,9 +15,9 @@ photo no longer exists are deleted automatically.
 Alongside thumbnails, this also keeps _data/photos.yml (the per-photo
 metadata used by the gallery/map on /photos/) in sync: `date` and `lat`/`lng`
 are auto-filled from EXIF (GPS tags, when present) the first time a photo is
-seen, or whenever they're still unset. `caption` and `location` are never
-touched by this script -- they're written by hand. Entries for deleted
-photos are removed automatically, same as their thumbnails.
+seen, or whenever they're still unset. `caption`, `location`, and `visible`
+are never touched by this script -- they're written by hand. Entries for
+deleted photos are removed automatically, same as their thumbnails.
 """
 import hashlib
 import json
@@ -44,6 +44,9 @@ PHOTOS_DATA_HEADER = (
     "# `date` and `lat`/`lng` are auto-filled from EXIF by\n"
     "# scripts/generate_photo_thumbnails.py (only when unset -- edits here are\n"
     "# preserved). `caption` and `location` are always written by hand.\n"
+    "# Set `visible: false` to hide a photo from the gallery/map without\n"
+    "# deleting it or its thumbnail; omitted (or `true`) means visible. Never\n"
+    "# touched by the sync script.\n"
 )
 
 

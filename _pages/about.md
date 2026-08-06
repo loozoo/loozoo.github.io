@@ -9,8 +9,7 @@ redirect_from:
 
 <!-- bundle exec jekyll serve -l -H localhost -->
 
-I'm an fourth-year undergraduate at Harvard, double majoring in mathematics and physics (Class of
-2027). Alongside my bachelor's, I'm also completing a concurrent master's (A.M.) in mathematics. I recently spent Hilary & Trinity terms as a visiting student at [Oriel College](https://www.oriel.ox.ac.uk/), Oxford University, studying at the [Mathematical Institute](https://www.maths.ox.ac.uk/). 
+I'm a fourth-year undergraduate at Harvard, double majoring in mathematics and physics (Class of 2027). Alongside my bachelor's, I'm also completing a concurrent master's (A.M.) in mathematics. I recently spent Hilary & Trinity terms as a visiting student at [Oriel College](https://www.oriel.ox.ac.uk/), Oxford University, studying at the [Mathematical Institute](https://www.maths.ox.ac.uk/). 
 
 
 My research interests lie broadly in algebra, geometry, and topology, especially in
@@ -20,9 +19,10 @@ topological methods for data analysis. I'm also interested in category theory an
 relative algebraic geometry.
 
 
-Outside of this all, I'm the academic lead for [NZPMC](https://www.nzpmc.com/). And away from academic work entirely, I enjoy cycling, [taking photos]({{ "/photos/" | relative_url }}), and Geoguessr/[OSINT](https://osintframework.com/)-style puzzles. If you want to know more about the latter two, have a go at guessing below.
+Outside of all this, I'm the academic lead for [NZPMC](https://www.nzpmc.com/). And away from academic work entirely, I enjoy cycling, [taking photos]({{ "/photos/" | relative_url }}), and Geoguessr/[OSINT](https://osintframework.com/)-style puzzles. If you want to know more about the latter two, have a go at guessing below.
 
 {% assign geo_files = site.static_files | where_exp: "file", "file.path contains '/images/photos/'" | sort: "name" %}
+{% assign geo_files = geo_files | where_exp: "file", "site.data.photos[file.name].visible != false" %}
 {% assign geo_points = geo_files | where_exp: "file", "site.data.photos[file.name].lat" | where_exp: "file", "site.data.photos[file.name].lng" %}
 {% if geo_points.size > 1 %}
 <section id="geo-game" class="geo-game" aria-label="Guess where my photos were taken">

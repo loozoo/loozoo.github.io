@@ -2,12 +2,20 @@
 
 <meta charset="utf-8">
 
+<!-- Favicon (files live in /images/, generated via realfavicongenerator.net) -->
+<link rel="icon" href="{{ '/images/favicon.svg' | relative_url }}" type="image/svg+xml">
+<link rel="icon" href="{{ '/images/favicon-32x32.png' | relative_url }}" sizes="32x32" type="image/png">
+<link rel="icon" href="{{ '/images/favicon-192x192.png' | relative_url }}" sizes="192x192" type="image/png">
+<link rel="shortcut icon" href="{{ '/images/favicon.ico' | relative_url }}">
+<link rel="apple-touch-icon" href="{{ '/images/apple-touch-icon-180x180.png' | relative_url }}">
+<link rel="manifest" href="{{ '/images/manifest.json' | relative_url }}">
+
 {% include seo.html %}
 
-<!-- Google Fonts: IBM Plex Sans -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<!-- IBM Plex Sans is self-hosted (see _sass/include/_fonts.scss) rather than
+     loaded from Google's CDN -- avoids leaking every visitor's IP/user-agent
+     to Google on each page load and drops a render-blocking third-party
+     request. -->
 
 <link href="{% if site.atom_feed.path %}{{ site.atom_feed.path }}{% else %}{{ base_path }}/feed.xml{% endif %}" type="application/atom+xml" rel="alternate" title="{{ site.title }} Feed">
 

@@ -1,0 +1,45 @@
+/* ==========================================================================
+   BACK TO TOP
+   Persistent floating button (see _layouts/default.html) that scrolls the
+   page back to the top once you've scrolled far enough down. Toggled via
+   the .is-visible class -- see the scroll handler in assets/js/_main.js.
+   ========================================================================== */
+
+.back-to-top {
+  position: fixed;
+  right: 1.5em;
+  bottom: 1.5em;
+  z-index: 500; // below .lightbox-overlay's 9999 (_photo-grid.scss), above page content
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75em;
+  height: 2.75em;
+  padding: 0;
+  color: #fff;
+  font-size: $type-size-5;
+  background: var(--global-base-color);
+  border: 0;
+  border-radius: 50%;
+  box-shadow: $box-shadow;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(0.5em);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+
+  &.is-visible {
+    opacity: 0.85;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  &:hover {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: opacity 0.2s ease, visibility 0.2s;
+    transform: none;
+  }
+}

@@ -1,20 +1,20 @@
 <div class="research-item">
   <h3 class="research-item__title">{{ post.title | markdownify | remove: "<p>" | remove: "</p>" }}</h3>
 
-  {% if post.date_label or post.tags.size > 0 or post.pdf %}
-    <p class="research-item__meta">
-      {% if post.date_label %}<span class="research-item__date">{{ post.date_label }}</span>{% endif %}
-      {% for tag in post.tags %}<span class="research-item__tag">{{ tag }}</span>{% endfor %}
-      {% if post.pdf %}
-        {% if post.pdf contains "://" %}
-          {% assign pdf_url = post.pdf %}
-        {% else %}
-          {% assign pdf_url = post.pdf | relative_url %}
-        {% endif %}
-        <a class="research-item__pdf" href="{{ pdf_url }}" target="_blank" rel="noopener"><i class="fa fa-file-pdf" aria-hidden="true"></i> PDF</a>
+  <p class="research-item__meta">
+    {% if post.date_label %}<span class="research-item__date">{{ post.date_label }}</span>{% endif %}
+    {% for tag in post.tags %}<span class="research-item__tag">{{ tag }}</span>{% endfor %}
+    {% if post.pdf %}
+      {% if post.pdf contains "://" %}
+        {% assign pdf_url = post.pdf %}
+      {% else %}
+        {% assign pdf_url = post.pdf | relative_url %}
       {% endif %}
-    </p>
-  {% endif %}
+      <a class="research-item__pdf" href="{{ pdf_url }}" target="_blank" rel="noopener"><i class="fa fa-file-pdf" aria-hidden="true"></i> PDF</a>
+    {% else %}
+      <a class="research-item__pdf" href="{{ '/pdf-coming-soon/' | relative_url }}"><i class="fa fa-file-pdf" aria-hidden="true"></i> PDF</a>
+    {% endif %}
+  </p>
 
   {% assign description = post.description | default: post.content %}
   {% if description != "" %}

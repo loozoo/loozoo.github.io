@@ -2,37 +2,152 @@
 # `date` and `lat`/`lng` are auto-filled from EXIF by
 # scripts/generate_photo_thumbnails.py (only when unset -- edits here are
 # preserved). `caption` and `location` are always written by hand.
+# Set `visible: false` to hide a photo from the gallery/map without
+# deleting it or its thumbnail; omitted (or `true`) means visible. Never
+# touched by the sync script.
 
+20260113_084625.jpg:
+  caption: Juice
+  date: null
+  lat: 37.794788
+  lng: -122.392650
+  location: Embarcadero, San Francisco
+20260226_135328.jpg:
+  caption: Plaza de España
+  date: null
+  lat: 40.424151
+  lng: -3.712188
+  location: Madrid
+20260228_143414.jpg:
+  caption: Institut Verdaguer 
+  date: null
+  lat: 41.387017
+  lng: 2.186776
+  location: Barcelona
+20260310_142350.jpg:
+  caption: The Bear
+  date: null
+  lat: 51.751633
+  lng: -1.254907
+  location: Oxford
+20260317_161218.jpg:
+  caption: Lunch Break
+  date: null
+  lat: 48.862933
+  lng: 2.329714
+  location: Jardin des Tuileries
+20260318_142909.jpg:
+  caption: A Call
+  date: null
+  lat: 48.636283
+  lng: -1.510866
+  location: Mont-Saint-Michel
 20260318_151038.jpg:
   caption: Vines
   date: '2026-03-18'
-  lat: 48.6360
-  lng: -1.511400
-  location: Mont Saint-Michel
+  lat: 48.636
+  lng: -1.5114
+  location: Mont-Saint-Michel
+20260322_124712.jpg:
+  caption: Via Rialto
+  date: null
+  lat: 44.488560
+  lng: 11.349239
+  location: Bologna
+20260323_152738.jpg:
+  caption: Tessellate
+  date: null
+  lat: 44.479793
+  lng: 11.299125
+  location: Santuario Madonna di San Luca
 20260327_155905.jpg:
   caption: O partigiano
   date: '2026-03-27'
   lat: 45.886087
   lng: 8.535315
   location: Stresa
+20260327_161809.jpg:
+  caption: Top Mid
+  date: null
+  lat: 45.886544
+  lng: 8.522587
+  location: Inferno
+20260328_141454.jpg:
+  caption: Fish
+  date: null
+  lat: 45.901025
+  lng: 8.520444
+  location: Isola dei Pescatori
+20260329_113854.jpg:
+  caption: Into the Swiss Alps
+  date: null
+  lat: 46.116211
+  lng: 8.297137
+  location: Domodossola
+20260330_130857.jpg:
+  caption: The Valley
+  date: '2026-03-30'
+  lat: 46.572959
+  lng: 7.906625
+  location: Lauterbrunnen
 20260330_130902(1).jpg:
   caption: The Valley
   date: '2026-03-30'
   lat: 46.572959
   lng: 7.906625
   location: Lauterbrunnen
+  visible: false
+20260330_130902.jpg:
+  caption: null
+  date: null
+  lat: null
+  lng: null
+  location: null
+  visible: false
+20260330_131827.jpg:
+  caption: Blue, White, Green
+  date: '2026-03-30'
+  lat: 46.563521
+  lng: 7.905549
+  location: Lauterbrunnen
+20260330_154623.jpg:
+  caption: Snowstorm
+  date: null
+  lat: 46.606626
+  lng: 7.925217
+  location: Wengen
 20260331_153230(0)(1).jpg:
   caption: Train
   date: '2026-03-31'
   lat: 46.622926
   lng: 8.022584
-  location: Grindelwald 
+  location: Grindelwald
+  visible: false
+20260331_153230(0).jpg:
+  caption: Train
+  date: '2026-03-31'
+  lat: 46.622926
+  lng: 8.022584
+  location: Grindelwald
 20260331_173121.jpg:
   caption: From the Gletscherschlucht
   date: '2026-03-31'
   lat: 46.613586
   lng: 8.046365
   location: Grindelwald
+  visible: false
+20260331_173208.jpg:
+  caption: From the Gletscherschlucht
+  date: '2026-03-31'
+  lat: 46.613586
+  lng: 8.046365
+  location: Grindelwald
+20260401_120206.jpg:
+  caption: Crystal
+  date: null
+  lat: 46.685342
+  lng: 7.793340
+  location: Lake Thun
 20260401_121450.jpg:
   caption: A peek at Thunersee
   date: '2026-04-01'
@@ -40,22 +155,41 @@
   lng: 7.805842
   location: Lake Thun
 20260401_125252.jpg:
-  caption: Winding roads 
+  caption: Winding Roads
+  date: '2026-04-01'
+  lat: 46.688991
+  lng: 7.743807
+  location: Lake Thun
+  visible: false
+20260401_125254.jpg:
+  caption: Winding Roads
   date: '2026-04-01'
   lat: 46.688991
   lng: 7.743807
   location: Lake Thun
 20260403_133611.jpg:
-  caption: A view from Hafelekarspitze 
+  caption: Hafelekarspitze
   date: '2026-04-03'
-  lat: 47.312840
+  lat: 47.31284
   lng: 11.386266
   location: Innsbruck
+20260403_180858.jpg:
+  caption: Tyrol
+  date: null
+  lat: 47.265999
+  lng: 11.394014
+  location: Innsbruck
 20260406_133029(0)(1).jpg:
-  caption: The shores of Bled
+  caption: Bled Shores
   date: '2026-04-06'
   lat: 46.359018
   lng: 14.085474
+  location: Lake Bled
+20260406_133955.jpg:
+  caption: Pletna 
+  date: null
+  lat: 46.358312
+  lng: 14.090580
   location: Lake Bled
 20260406_143154.jpg:
   caption: Hvala, Velika Osojnica!
@@ -69,8 +203,21 @@
   lat: 45.436347
   lng: 12.323424
   location: Venezia
+  visible: false
+20260407_162125.jpg:
+  caption: Ramo Arnaldi
+  date: '2026-04-07'
+  lat: 45.436347
+  lng: 12.323424
+  location: Venezia
+20260407_173709.jpg:
+  caption: Gondola
+  date: null
+  lat: 45.433793
+  lng: 12.343488
+  location: Venezia
 20260408_192059.jpg:
-  caption: Sunset in Venezia
+  caption: Lamplight
   date: '2026-04-08'
   lat: 45.430322
   lng: 12.354284
@@ -78,9 +225,17 @@
 20260429_173500(1).jpg:
   caption: Spring on the Thames
   date: '2026-04-29'
-  lat: 51.762500
+  lat: 51.7625
   lng: -1.279271
   location: Fiddler's Island
+20260429_173500.jpg:
+  caption: Spring on the Thames
+  date: '2026-04-29'
+  lat: 51.7625
+  lng: -1.279271
+  location: Fiddler's Island
+  visible: false
+  #lightroom version, not as good
 20260501_153606(1)(1).jpg:
   caption: Cows in a Meadow
   date: '2026-05-01'
@@ -88,31 +243,45 @@
   lng: -1.278265
   location: Port Meadow
 20260510_163728(2).jpg:
+  caption: Across
+  date: '2026-05-10'
+  lat: 51.774576
+  lng: -1.294496
+  location: Godstow
+20260510_163728.jpg:
   caption: Across, where I once was
   date: '2026-05-10'
   lat: 51.774576
   lng: -1.294496
   location: Godstow
+  visible: false
 20260527_203216(1).jpg:
   caption: Second Quad
   date: '2026-05-27'
   lat: 51.752194
   lng: -1.253698
   location: Oriel College
+20260527_203216.jpg:
+  caption: Second Quad
+  date: '2026-05-27'
+  lat: 51.752194
+  lng: -1.253698
+  location: Oriel College
+  visible: false
 20260529_160728.jpg:
   caption: Stairway to...
   date: '2026-05-29'
   lat: 51.725417
-  lng: -1.241950
+  lng: -1.24195
   location: On the A423
 20260608_170754.jpg:
-  caption: A portal?
+  caption: Portal
   date: '2026-06-08'
   lat: 51.765663
   lng: -1.282147
   location: Binsey
 20260612_203120(1).jpg:
-  caption: 
+  caption: null
   date: '2026-06-12'
   lat: 51.751199
   lng: -1.253084
@@ -129,12 +298,19 @@
   lat: -37.009711
   lng: 174.783229
   location: Auckland
+  visible: false
+20260618_113811.jpg:
+  caption: End of the Rainbow
+  date: '2026-06-18'
+  lat: -37.009711
+  lng: 174.783229
+  location: Auckland
 20260629_133745.jpg:
   caption: What lies ahead
   date: '2026-06-29'
   lat: -43.339146
   lng: 171.514814
-  location: Algidus Rd 
+  location: Algidus Rd
 20260629_150307.jpg:
   caption: Minecraft
   date: '2026-06-29'
@@ -153,6 +329,7 @@
   lat: -43.316111
   lng: 171.488604
   location: Lake Coleridge
+  visible: false
 20260629_155820(2).jpg:
   caption: Pre-history
   date: '2026-06-29'
@@ -165,6 +342,7 @@
   lat: -43.315893
   lng: 171.489261
   location: Lake Coleridge
+  visible: false
 20260629_163917(2).jpg:
   caption: Braided Monoidal River
   date: '2026-06-29'
@@ -176,4 +354,30 @@
   date: '2026-06-29'
   lat: -43.324796
   lng: 171.488245
-  location: Blackhill Range 
+  location: Blackhill Range
+  visible: false
+20260729_165049.jpg:
+  caption: Monodromy
+  date: null
+  lat: -43.507301
+  lng: 172.731492
+  location: New Brighton
+20260729_165953.jpg:
+  caption: Return
+  date: null
+  lat: -43.507253
+  lng: 172.731686
+  location: New Brighton
+20260729_170659.jpg:
+  caption: Glow
+  date: null
+  lat: -43.497573
+  lng: 172.727447
+  location: Marine Parade
+coleridge1-3.jpg:
+  caption: null
+  date: null
+  lat: null
+  lng: null
+  location: null
+  visible: false

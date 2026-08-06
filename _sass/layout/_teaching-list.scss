@@ -72,7 +72,9 @@ $teaching-description-font-size: 0.85em;
   font-style: italic;
 }
 
-.teaching-item__pdf {
+.teaching-item__pdf,
+.teaching-item__site,
+.teaching-item__drive {
   display: inline-flex;
   align-items: center;
   gap: 0.35em;

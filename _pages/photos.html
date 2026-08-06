@@ -7,8 +7,9 @@ author_profile: true
 
 {% include base_path %}
 
-{% assign photo_files = site.static_files | where_exp: "file", "file.path contains '/images/photos/'" | sort: "name" %}
+{% assign all_photo_files = site.static_files | where_exp: "file", "file.path contains '/images/photos/'" | sort: "name" | reverse %}
 {% assign photos_data = site.data.photos %}
+{% assign photo_files = all_photo_files | where_exp: "file", "photos_data[file.name].visible != false" %}
 
 <div class="photo-grid">
 {% for file in photo_files %}

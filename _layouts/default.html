@@ -36,6 +36,15 @@ layout: compress
 
     {{ content }}
 
+    {% comment %}
+      Lives in the persistent shell (outside #page-content, like the masthead)
+      so it never needs re-initializing after a Swup swap -- see the
+      back-to-top handler in assets/js/_main.js, bound once on first load.
+    {% endcomment %}
+    <button type="button" id="back-to-top" class="back-to-top" aria-label="Back to top" title="Back to top">
+      <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </button>
+
     <div class="page__footer">
       <footer>
         {% include footer/custom.html %}

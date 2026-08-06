@@ -1,0 +1,34 @@
+/* ==========================================================================
+   RESOURCE COMING SOON
+   Shared "simple message + icon + Go Back button" layout, used by:
+   - the PDF/Drive placeholder pages linked from research/teaching item
+     badges that don't have their URL front-matter field set yet (see
+     _includes/research-single.html and _includes/teaching-single.html)
+   - the 404 page (_pages/404.html)
+   ========================================================================== */
+
+.resource-coming-soon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75em;
+  padding: 4em 1em;
+  color: var(--global-text-color);
+  text-align: center;
+
+  // Muted, unlike the "Go Back" button below, which stays fully legible.
+  &__icon {
+    font-size: 2.5em;
+    opacity: 0.7;
+  }
+
+  p {
+    margin: 0;
+    font-size: $type-size-6;
+    opacity: 0.7;
+  }
+}
+
+.resource-coming-soon__back {
+  margin-top: 0.5em;
+}

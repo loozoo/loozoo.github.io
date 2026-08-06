@@ -1,7 +1,7 @@
 <div class="teaching-item">
   <h3 class="teaching-item__title">{{ post.title | markdownify | remove: "<p>" | remove: "</p>" }}</h3>
 
-  {% if post.date_note or post.date or post.type or post.venue or post.tags.size > 0 or post.pdf %}
+  {% if post.date_note or post.date or post.type or post.venue or post.tags.size > 0 or post.pdf or post.site_url or post.drive_url %}
     <p class="teaching-item__meta">
       {% if post.date_note %}
         <span class="teaching-item__date">{{ post.date_note }}</span>
@@ -18,6 +18,22 @@
           {% assign pdf_url = post.pdf | relative_url %}
         {% endif %}
         <a class="teaching-item__pdf" href="{{ pdf_url }}" target="_blank" rel="noopener"><i class="fa fa-file-pdf" aria-hidden="true"></i> PDF</a>
+      {% endif %}
+      {% if post.site_url %}
+        {% if post.site_url contains "://" %}
+          {% assign site_url = post.site_url %}
+        {% else %}
+          {% assign site_url = post.site_url | relative_url %}
+        {% endif %}
+        <a class="teaching-item__site" href="{{ site_url }}" target="_blank" rel="noopener"><i class="fa fa-globe" aria-hidden="true"></i> {{ post.site_label | default: "Site" }}</a>
+      {% endif %}
+      {% if post.drive_url %}
+        {% if post.drive_url contains "://" %}
+          {% assign drive_url = post.drive_url %}
+        {% else %}
+          {% assign drive_url = post.drive_url | relative_url %}
+        {% endif %}
+        <a class="teaching-item__drive" href="{{ drive_url }}" target="_blank" rel="noopener"><i class="fab fa-google-drive" aria-hidden="true"></i> Drive</a>
       {% endif %}
     </p>
   {% endif %}
