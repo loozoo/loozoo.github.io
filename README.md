@@ -59,6 +59,20 @@ When you are initially working on your website, it is very useful to be able to 
 
 If you are running on Linux it may be necessary to install some additional dependencies prior to being able to run locally: `sudo apt install build-essential gcc make`
 
+## Regenerating the photo colour analysis
+
+The Chromatic Geography map at the bottom of `/photos/` reads a precomputed file, `assets/data/chromatic-analysis.json`. It is regenerated automatically: whenever a push to `master` changes `images/photos/` or `_data/photos.yml`, the "Update photo gallery data" workflow (`.github/workflows/photo-thumbnails.yml`) rebuilds the thumbnails and then reruns the analysis over the whole visible gallery, committing both.
+
+It analyses exactly the photos the gallery shows (`images/photos/`, minus `visible: false` in `_data/photos.yml`). Until the workflow finishes, new photos are simply left off the map, with a note saying so. To run it locally instead:
+
+```bash
+# one-time setup
+python -m pip install -r scripts/requirements-chromatic.txt
+
+# after scripts/generate_photo_thumbnails.py
+python scripts/chromatic_analysis.py
+```
+
 ## Using Docker
 
 Working from a different OS, or just want to avoid installing dependencies? You can use the provided `Dockerfile` to build a container that will run the site for you if you have [Docker](https://www.docker.com/) installed.

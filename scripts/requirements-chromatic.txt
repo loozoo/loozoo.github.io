@@ -1,0 +1,8 @@
+# Offline dependencies for scripts/chromatic_analysis.py (not needed by Jekyll).
+numpy
+scipy
+Pillow
+PyYAML
+scikit-image
+scikit-learn
+POT

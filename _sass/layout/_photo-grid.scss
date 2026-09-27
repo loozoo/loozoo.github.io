@@ -17,6 +17,10 @@
   }
 }
 
+// Hover effect on gallery tiles: the photo zooming in slightly, on top of the
+// caption fading in. Off for now -- set to true to bring it back.
+$photo-grid-hover-zoom: false;
+
 .photo-grid__item {
   position: relative;
   display: block;
@@ -30,11 +34,16 @@
     height: 100%;
     object-fit: cover;
     display: block;
-    transition: transform 0.2s ease;
   }
 
-  &:hover img {
-    transform: scale(1.05);
+  @if $photo-grid-hover-zoom {
+    img {
+      transition: transform 0.2s ease;
+    }
+
+    &:hover img {
+      transform: scale(1.05);
+    }
   }
 }
 
@@ -64,16 +73,227 @@
   opacity: 0.8;
 }
 
+.photo-grid__heading {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5em;
+  margin-top: 0;
+}
+
+.photo-grid__count {
+  font-size: $type-size-6;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: var(--global-text-color-light);
+}
+
+/* ==========================================================================
+   FEATURED REEL (top of /photos/)
+   Set apart from the square grid below: photos keep their own aspect ratio,
+   sit larger in their own panel, and carry always-visible numbered labels.
+   The panel's left/right edges are the prev/next buttons; they and smooth
+   wheel scrolling are wired up by initPhotoFeature() in _main.js.
+   ========================================================================== */
+
+$feature-edge: 2em;
+$feature-edge-small: 1.5em;
+
+.photo-feature {
+  margin: 0 0 2.5em;
+  // No side padding: the edge buttons fill that space instead.
+  padding: 0.9em 0 0.6em;
+  border-radius: $border-radius * 2;
+  // Light mode follows the site's Border look -- a black rule, like the photo
+  // map -- over a faint wash of the accent colour (a warm near-white rather
+  // than a grey); dark mode swaps the rule for a soft tint.
+  border: 1px solid var(--global-border-color);
+  background: color-mix(in srgb, var(--global-base-color) 5%, var(--global-bg-color));
+
+  html[data-theme="dark"] & {
+    border-color: transparent;
+    background: var(--global-hover-color);
+  }
+}
+
+// Doubled class to outrank `.page__content h2`'s rule and padding.
+.photo-feature .photo-feature__heading {
+  margin: 0 0 0.8em;
+  padding: 0 0 0 $feature-edge;
+  border: 0;
+  font-size: $type-size-7;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--global-base-color);
+
+  @include breakpoint(max-width $small) {
+    padding-left: $feature-edge-small;
+  }
+}
+
+.photo-feature__stage {
+  display: grid;
+  // minmax(0, ...) lets the reel overflow (and scroll) rather than widen.
+  grid-template-columns: $feature-edge minmax(0, 1fr) $feature-edge;
+
+  @include breakpoint(max-width $small) {
+    grid-template-columns: $feature-edge-small minmax(0, 1fr) $feature-edge-small;
+  }
+}
+
+.photo-feature__edge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  // Centres the chevron on the photos rather than photos + labels.
+  padding: 0 0 2.6em;
+  margin: 0;
+  border: 0;
+  border-radius: $border-radius;
+  background: transparent;
+  color: var(--global-text-color);
+  font-size: 0.9rem;
+  line-height: 1;
+  opacity: 0.55;
+  cursor: pointer;
+  transition: opacity 0.2s ease, color 0.2s ease, background 0.2s ease;
+
+  &:hover:not(:disabled) {
+    opacity: 1;
+    color: var(--global-base-color);
+    background: var(--global-hover-color);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--global-base-color);
+    outline-offset: -2px;
+    opacity: 1;
+  }
+
+  &:disabled {
+    opacity: 0.15;
+    cursor: default;
+  }
+
+  // Nothing to scroll (or no JS): keep the space, hide the buttons.
+  .photo-feature:not(.is-scrollable) & {
+    visibility: hidden;
+  }
+}
+
+.photo-feature__reel {
+  display: flex;
+  gap: 0.9em;
+  overflow-x: auto;
+  // Room for the focus ring and the scrollbar, clear of the labels.
+  padding: 3px 3px 0.4em;
+  margin: -3px -3px 0;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--global-text-color) 25%, transparent) transparent;
+}
+
+// Scoped under .photo-feature to outrank the theme's `.archive a` underline.
+.photo-feature .photo-feature__item {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  color: inherit;
+  text-decoration: none;
+  cursor: zoom-in;
+
+  &:hover,
+  &:focus {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  // No hover effect -- this also cancels the theme's `.archive a:hover img`
+  // glow.
+  &:hover img {
+    box-shadow: none;
+  }
+
+  &:focus-visible {
+    outline: none;
+
+    .photo-feature__frame {
+      outline: 2px solid var(--global-base-color);
+      outline-offset: 2px;
+    }
+  }
+}
+
+.photo-feature__frame {
+  display: block;
+  height: clamp(260px, 45vw, 360px);
+  overflow: hidden;
+  border-radius: $border-radius;
+
+  // Flat on white in light mode, to match the Border look.
+  html[data-theme="dark"] & {
+    box-shadow: 0 4px 14px rgba(#000, 0.25);
+  }
+
+  img {
+    display: block;
+    height: 100%;
+    width: auto;
+    max-width: none;
+  }
+}
+
+.photo-feature__label {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55em;
+  // Zero intrinsic width, then fill: the photo alone sets the tile's width
+  // and long captions wrap beneath it instead of widening it.
+  width: 0;
+  min-width: 100%;
+  margin-top: 0.6em;
+}
+
+.photo-feature__num {
+  flex: none;
+  font-size: $type-size-7;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.05em;
+  color: var(--global-base-color);
+}
+
+.photo-feature__title {
+  display: block;
+  font-weight: 600;
+  font-size: 0.9rem;
+  line-height: 1.25;
+}
+
+.photo-feature__location {
+  display: block;
+  margin-top: 0.2em;
+  font-size: $type-size-7;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--global-text-color-light);
+}
+
 .lightbox-overlay {
   display: none;
   position: fixed;
+  // Touch gestures here are the photo's own (pinch/double-tap zoom, pan,
+  // swipe -- see initPhotoLightbox), not the page's pinch-zoom or scroll.
+  touch-action: none;
   inset: 0;
   z-index: 9999;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   background: rgba(#000, 0.9);
-  cursor: zoom-out;
+  // Plain arrow off the photo; clicking the backdrop still closes the lightbox
+  // (see the overlay click handler in initPhotoLightbox()).
+  cursor: default;
 
   &.is-active {
     display: flex;
@@ -141,12 +361,18 @@
   // In normal flex flow (see .lightbox-overlay) so it always sits a fixed
   // distance below the image itself, rather than at a fixed viewport offset
   // that could overlap tall portrait photos.
-  margin-top: 0.85em;
+  // An invisible box around the text: clicks inside it select the caption
+  // instead of falling through to the backdrop and closing the lightbox.
+  // The padding widens the target; the margin shrinks to match, so the text
+  // stays where it was.
+  margin-top: 0.85em - 0.4em;
+  padding: 0.4em 0.9em;
   max-width: 90vw;
   text-align: center;
   color: #fff;
   text-shadow: 0 1px 3px rgba(#000, 0.8);
-  pointer-events: none;
+  cursor: text;
+  user-select: text;
 
   &.is-empty {
     display: none;
@@ -166,15 +392,170 @@
   margin-top: 0.15em;
 }
 
+// Set by updateLocationLink() in _main.js when the photo has a pin on the
+// Photo Map: clicking it closes the lightbox and flies the map there.
+.lightbox-overlay__caption-location.is-link {
+  display: inline-block;
+  pointer-events: auto; // the caption around it ignores the pointer
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: rgba(#fff, 0.35);
+  text-underline-offset: 0.2em;
+  transition: opacity 0.15s ease, text-decoration-color 0.15s ease;
+
+  &:hover,
+  &:focus-visible {
+    opacity: 1;
+    text-decoration-color: currentColor;
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(#fff, 0.8);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+// Everything drawn over the photo fades out while it's held to zoom, so the
+// zoomed photo is shown clean -- caption and location together, rather than
+// the enlarged photo covering one and not the other.
+.lightbox-overlay__caption,
+.lightbox-overlay__close,
+.lightbox-overlay__prev,
+.lightbox-overlay__next,
+.lightbox-overlay__counter,
+.lightbox-overlay__strip {
+  transition: opacity 0.15s ease;
+
+  .lightbox-overlay.is-zoomed & {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
 // The date is kept in the DOM (see setCaption() in _main.js) but not shown --
 // just not part of the public-facing caption.
 .lightbox-overlay__caption-date {
   display: none;
 }
 
+// Filmstrip + counter, built by initPhotoLightbox() in _main.js when there's a
+// gallery to browse. Single-photo views (.is-single, the geo-game) hide both.
+$lightbox-thumb: 52px;
+$lightbox-thumb-small: 42px;
+$lightbox-strip-pad: 12px;
+
+.lightbox-overlay.has-strip:not(.is-single) {
+  // Centre the photo + caption in the space above the strip.
+  padding-bottom: $lightbox-thumb + 2 * $lightbox-strip-pad;
+
+  .lightbox-overlay__img {
+    max-height: unquote("min(80vh, calc(100vh - #{$lightbox-thumb + 2 * $lightbox-strip-pad} - 7.5rem))");
+  }
+
+  .lightbox-overlay__prev,
+  .lightbox-overlay__next {
+    top: calc(50% - #{($lightbox-thumb + 2 * $lightbox-strip-pad) * 0.5});
+  }
+}
+
+.lightbox-overlay__counter {
+  position: absolute;
+  top: 1.6em;
+  left: 1.5em;
+  color: rgba(#fff, 0.7);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+
+  .is-single & {
+    display: none;
+  }
+}
+
+.lightbox-overlay__strip {
+  position: absolute;
+  touch-action: pan-x; // scrolls natively, unlike the rest of the overlay
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  gap: 6px;
+  // Half the width of padding either side lets the first and last photos
+  // scroll to the centre too, so the current photo is always in the middle.
+  padding: $lightbox-strip-pad 50%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  cursor: default;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  .is-single & {
+    display: none;
+  }
+}
+
+.lightbox-overlay__strip-thumb {
+  flex: 0 0 auto;
+  width: $lightbox-thumb;
+  height: $lightbox-thumb;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 4px;
+  background: rgba(#fff, 0.08);
+  opacity: 0.4;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+
+  @include breakpoint(max-width $small) {
+    width: $lightbox-thumb-small;
+    height: $lightbox-thumb-small;
+  }
+
+  // Undo the full-size photo rules on `.lightbox-overlay img` above.
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    object-fit: cover;
+    box-shadow: none;
+  }
+
+  &:hover,
+  &:focus-visible {
+    opacity: 0.8;
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(#fff, 0.8);
+    outline-offset: 2px;
+  }
+
+  &.is-current {
+    opacity: 1;
+    transform: scale(1.08);
+    box-shadow: 0 0 0 2px #fff;
+  }
+}
+
 // Hide the persistent site footer while a photo is open in the lightbox.
 body.lightbox-open .page__footer {
   display: none;
+}
+
+// Same for the floating back-to-top button (_back-to-top.scss). It sits
+// outside #main, so it would otherwise float over the lightbox. Hidden via
+// visibility (not display) so it fades back in when the lightbox closes.
+body.lightbox-open .back-to-top {
+  opacity: 0;
+  visibility: hidden;
 }
 
 // #main carries its own stacking context (see the `intro` animation on it in
@@ -199,7 +580,7 @@ body.lightbox-open .masthead {
 
 .photo-map {
   position: relative;
-  height: 360px;
+  height: 280px;
   border: 1px solid var(--global-border-color);
   border-radius: $border-radius;
   box-shadow: $box-shadow;
@@ -207,7 +588,7 @@ body.lightbox-open .masthead {
   margin-bottom: 2em;
 
   @include breakpoint($medium) {
-    height: 480px;
+    height: 360px;
   }
 
   // Leaflet ships its own font stack + heavy shadows on controls/popups;
@@ -250,7 +631,11 @@ body.lightbox-open .masthead {
     box-shadow: $box-shadow;
   }
 
+  // Outlined like the box above it. The tip is a rotated square whose top half
+  // is clipped by its container, so only its two lower edges show -- as the
+  // point's outline -- while its fill covers the box's bottom border there.
   .leaflet-popup-tip {
+    border: 1px solid var(--global-border-color);
     background: var(--global-bg-color);
     box-shadow: none;
   }

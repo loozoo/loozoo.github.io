@@ -1,0 +1,367 @@
+/* ==========================================================================
+   CHROMATIC GEOGRAPHY (bottom of /photos/)
+   Data from scripts/chromatic_analysis.py; laid out by buildChromatic() in
+   _main.js. The photos supply the colour -- everything else stays neutral.
+   ========================================================================== */
+
+.chroma {
+  margin: 2.5em 0 2em;
+
+  [hidden] {
+    display: none !important;
+  }
+}
+
+.chroma__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.6em 1em;
+  margin-bottom: 0.9em;
+
+  .chroma__sub {
+    margin-bottom: 0;
+  }
+}
+
+.chroma__heading {
+  margin-top: 0;
+}
+
+.chroma__sub,
+.chroma__status,
+.chroma__hint,
+.chroma__label {
+  margin: 0 0 0.9em;
+  font-size: $type-size-6;
+  color: var(--global-text-color-light);
+}
+
+// Reset shared by every clickable thing in the widget (zero specificity, so
+// the component rules below win without extra qualifiers).
+:where(.chroma) button {
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.chroma__link {
+  color: var(--global-text-color) !important;
+  text-decoration: underline;
+  text-decoration-color: var(--global-border-color);
+  text-underline-offset: 0.2em;
+
+  &:hover {
+    text-decoration-color: currentColor;
+  }
+}
+
+/* ---------- Geography ---------- */
+
+// Height and the --pt marker size are set by layout() in _main.js.
+.chroma__map {
+  position: relative;
+  height: 400px;
+}
+
+// Axes, ticks and guide lines, drawn by drawAxes() in _main.js. Kept faint so
+// the photos stay the subject; the zero lines are the strongest marks.
+.chroma__axes {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+
+  .is-ready & {
+    opacity: 1;
+  }
+
+  // Above the photos (z-index 1), below near/selected/hovered ones (3-5).
+  &--titles {
+    z-index: 2;
+  }
+
+  line,
+  path {
+    fill: none;
+    stroke: var(--global-text-color);
+    stroke-width: 1;
+  }
+
+  line {
+    shape-rendering: crispEdges;
+  }
+
+  text {
+    fill: var(--global-text-color-light);
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.chroma__grid {
+  stroke-opacity: 0.08;
+
+  &--minor {
+    stroke-opacity: 0.045;
+  }
+}
+
+.chroma__tick {
+  stroke-opacity: 0.3;
+}
+
+.chroma__axis-line {
+  stroke-opacity: 0.32;
+}
+
+.chroma__tick-label {
+  opacity: 0.7;
+}
+
+.chroma__axis-title {
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  // Halo in the page colour, so the title reads even over a photo.
+  paint-order: stroke;
+  stroke: var(--global-bg-color);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.chroma__lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+
+  line {
+    stroke: var(--global-text-color);
+    stroke-opacity: 0.4;
+    stroke-width: 1.25;
+  }
+}
+
+.chroma__pt {
+  position: absolute;
+  z-index: 1;
+  width: var(--pt, 44px);
+  height: var(--pt, 44px);
+  overflow: hidden;
+  background: var(--c);
+  border-radius: 3px;
+  box-shadow: 0 0 0 2px var(--global-bg-color), 0 1px 4px rgba(#000, 0.25);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.6);
+  transition: transform 0.2s ease, opacity 0.35s ease, width 0.2s ease, height 0.2s ease, border-radius 0.2s ease;
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    object-fit: cover;
+    transition: opacity 0.2s ease;
+  }
+
+  .is-ready & {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+
+  &:hover,
+  &:focus-visible {
+    z-index: 5;
+    transform: translate(-50%, -50%) scale(1.35);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--global-text-color);
+    outline-offset: 2px;
+  }
+
+  .has-selection & {
+    opacity: 0.3;
+  }
+
+  &.is-near {
+    z-index: 3;
+    box-shadow: 0 0 0 2px var(--global-bg-color), 0 0 0 3px var(--global-text-color-light);
+  }
+
+  &.is-selected {
+    z-index: 4;
+    transform: translate(-50%, -50%) scale(1.45);
+    box-shadow: 0 0 0 2px var(--global-bg-color), 0 0 0 4px var(--global-text-color);
+  }
+
+  .has-selection &.is-near,
+  .has-selection &.is-selected {
+    opacity: 1;
+  }
+}
+
+// Colours view: each photo becomes a ring of its colour histogram -- its
+// top codebook colours, arc length by weight (--mix is set in _main.js).
+.is-colours .chroma__pt {
+  width: calc(var(--pt, 44px) * 0.55);
+  height: calc(var(--pt, 44px) * 0.55);
+  background: var(--mix, var(--c));
+  border-radius: 50%;
+
+  img {
+    opacity: 0;
+  }
+}
+
+.chroma__tip {
+  position: absolute;
+  z-index: 10;
+  width: 170px;
+  padding: 0.35em;
+  background: var(--global-bg-color);
+  border: 1px solid var(--global-border-color);
+  border-radius: $border-radius;
+  box-shadow: 0 4px 14px rgba(#000, 0.18);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+
+  &.is-visible {
+    opacity: 1;
+  }
+}
+
+.chroma__tip-img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  margin: 0 0 0.35em;
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+.chroma__tip-title,
+.chroma__tip-loc {
+  display: block;
+  padding: 0 0.2em;
+  font-size: $type-size-6;
+  line-height: 1.35;
+}
+
+.chroma__tip-title {
+  font-weight: 600;
+}
+
+.chroma__tip-loc {
+  color: var(--global-text-color-light);
+}
+
+/* ---------- Nearest neighbours ---------- */
+
+.chroma__panel {
+  margin-top: 0.6em;
+}
+
+.chroma__selected-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1em;
+
+  .chroma__label {
+    margin-bottom: 0.6em;
+  }
+}
+
+.chroma__clear {
+  font-size: $type-size-6;
+}
+
+.chroma__neighbours {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.6em;
+  max-width: 34em;
+}
+
+.chroma__nb {
+  display: block;
+  min-width: 0;
+  text-align: left;
+  cursor: zoom-in;
+
+  img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    margin: 0 0 0.3em;
+    object-fit: cover;
+    border-radius: $border-radius;
+    transition: transform 0.2s ease;
+  }
+
+  &:hover img {
+    transform: scale(1.04);
+  }
+}
+
+.chroma__nb-title,
+.chroma__nb-dist {
+  display: block;
+  overflow: hidden;
+  font-size: $type-size-7;
+  line-height: 1.35;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.chroma__nb-dist {
+  color: var(--global-text-color-light);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- How it works ---------- */
+
+.chroma__how {
+  margin-top: 1em;
+  font-size: 0.85em;
+
+  summary {
+    cursor: pointer;
+    color: var(--global-text-color-light);
+  }
+
+  &[open] summary {
+    margin-bottom: 0.6em;
+  }
+
+  p {
+    max-width: 44em;
+  }
+
+  .katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0.2em 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chroma *,
+  .chroma *::after {
+    transition: none !important;
+  }
+}

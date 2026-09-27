@@ -5,13 +5,16 @@
 # Set `visible: false` to hide a photo from the gallery/map without
 # deleting it or its thumbnail; omitted (or `true`) means visible. Never
 # touched by the sync script.
+# Set `featured: <n>` to also show a photo in the Featured reel at the top
+# of /photos/, ordered by n (1 first). Also never touched by the script.
 
 20260113_084625.jpg:
   caption: Juice
   date: null
   lat: 37.794788
   lng: -122.39265
-  location: Embarcadero, San Francisco
+  location: San Francisco
+  visible: false
 20260226_135328.jpg:
   caption: Plaza de España
   date: null
@@ -79,19 +82,19 @@
   lng: 8.520444
   location: Isola dei Pescatori
 20260329_113854.jpg:
-  caption: Into the Swiss Alps
+  caption: Verso le Alpi svizzere
   date: null
   lat: 46.116211
   lng: 8.297137
   location: Domodossola
 20260330_130857.jpg:
-  caption: The Valley
+  caption: Valley
   date: '2026-03-30'
   lat: 46.572959
   lng: 7.906625
   location: Lauterbrunnen
 20260330_130902(1).jpg:
-  caption: The Valley
+  caption: Valley
   date: '2026-03-30'
   lat: 46.572959
   lng: 7.906625
@@ -107,6 +110,7 @@
 20260330_131827.jpg:
   caption: Blue, White, Green
   date: '2026-03-30'
+  featured: 6
   lat: 46.563521
   lng: 7.905549
   location: Lauterbrunnen
@@ -117,28 +121,29 @@
   lng: 7.925217
   location: Wengen
 20260331_153230(0)(1).jpg:
-  caption: Train
+  caption: Lightning
   date: '2026-03-31'
   lat: 46.622926
   lng: 8.022584
   location: Grindelwald
   visible: false
 20260331_153230(0).jpg:
-  caption: Train
+  caption: Passing By
   date: '2026-03-31'
   lat: 46.622926
   lng: 8.022584
   location: Grindelwald
 20260331_173121.jpg:
-  caption: From the Gletscherschlucht
+  caption: Lütschine
   date: '2026-03-31'
   lat: 46.613586
   lng: 8.046365
   location: Grindelwald
   visible: false
 20260331_173208.jpg:
-  caption: From the Gletscherschlucht
+  caption: Lütschine
   date: '2026-03-31'
+  featured: 4
   lat: 46.613586
   lng: 8.046365
   location: Grindelwald
@@ -219,6 +224,7 @@
 20260408_192059.jpg:
   caption: Lamplight
   date: '2026-04-08'
+  featured: 3
   lat: 45.430322
   lng: 12.354284
   location: Venezia
@@ -236,7 +242,7 @@
   location: Fiddler's Island
   visible: false
 20260501_153606(1)(1).jpg:
-  caption: Cows in a Meadow
+  caption: Meadow Company
   date: '2026-05-01'
   lat: 51.762409
   lng: -1.278265
@@ -319,6 +325,7 @@
 20260629_154235(1).jpg:
   caption: Elements
   date: '2026-06-29'
+  featured: 5
   lat: -43.317736
   lng: 171.491666
   location: Peak Hill
@@ -332,6 +339,7 @@
 20260629_155820(2).jpg:
   caption: Pre-history
   date: '2026-06-29'
+  featured: 2
   lat: -43.317432
   lng: 171.491871
   location: Peak Hill
@@ -370,6 +378,7 @@
 20260729_170659.jpg:
   caption: Glow
   date: null
+  featured: 1
   lat: -43.497573
   lng: 172.727447
   location: Marine Parade

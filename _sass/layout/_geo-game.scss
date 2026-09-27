@@ -129,7 +129,7 @@
     height: 340px;
   }
 
-  // Match the muted CARTO basemap styling used by the photo map.
+  // Match the muted Esri Gray Canvas basemap styling used by the photo map.
   .leaflet-container {
     font-family: $global-font-family;
     background: var(--global-bg-color);
@@ -168,7 +168,11 @@
     box-shadow: $box-shadow;
   }
 
+  // Outlined like the box above it. The tip is a rotated square whose top half
+  // is clipped by its container, so only its two lower edges show -- as the
+  // point's outline -- while its fill covers the box's bottom border there.
   .leaflet-popup-tip {
+    border: 1px solid var(--global-border-color);
     background: var(--global-bg-color);
     box-shadow: none;
   }

@@ -14,11 +14,11 @@ hide_title: true
 
 {% if site.publication_category %}
   {% comment %} The goo/metaball SVG filter def now lives in _layouts/default.html
-     (persistent shell) so its url(#research-tabs-goo) reference survives Swup swaps. {% endcomment %}
-  <div class="research-tabs" role="tablist">
-    <div class="research-tabs__goo">
-      <span class="research-tabs__thumb-echo" aria-hidden="true"></span>
-      <span class="research-tabs__thumb" aria-hidden="true"></span>
+     (persistent shell) so its url(#goo-toggle-filter) reference survives Swup swaps. {% endcomment %}
+  <div class="goo-toggle research-tabs" role="tablist">
+    <div class="goo-toggle__goo">
+      <span class="goo-toggle__thumb-echo" aria-hidden="true"></span>
+      <span class="goo-toggle__thumb" aria-hidden="true"></span>
     </div>
     {% assign tab_index = 0 %}
     {% for category in site.publication_category %}
@@ -27,7 +27,7 @@ hide_title: true
         {% if post.category == category[0] %}{% assign item_count = item_count | plus: 1 %}{% endif %}
       {% endfor %}
       {% if item_count > 0 %}
-        <button type="button" role="tab" class="research-tabs__btn{% if tab_index == 0 %} is-active{% endif %}" data-panel="{{ category[0] }}">{{ category[1].title }}</button>
+        <button type="button" role="tab" class="goo-toggle__btn{% if tab_index == 0 %} is-active{% endif %}" data-panel="{{ category[0] }}">{{ category[1].title }}</button>
         {% assign tab_index = tab_index | plus: 1 %}
       {% endif %}
     {% endfor %}

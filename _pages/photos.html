@@ -11,6 +11,50 @@ author_profile: true
 {% assign photos_data = site.data.photos %}
 {% assign photo_files = all_photo_files | where_exp: "file", "photos_data[file.name].visible != false" %}
 
+{% comment %}
+  Featured reel: photos with `featured: <n>` in _data/photos.yml, ordered by n.
+  Each tile links to the same full-size path as its grid tile, so
+  initPhotoLightbox() in _main.js opens it at its place in the main gallery
+  sequence rather than counting it twice. The edge buttons either side of the
+  reel, and smooth wheel scrolling, are wired up by initPhotoFeature().
+{% endcomment %}
+{% assign featured_files = photo_files | where_exp: "file", "photos_data[file.name].featured" %}
+{% if featured_files.size > 0 %}
+<section class="photo-feature" aria-labelledby="photo-feature-heading">
+  <h2 id="photo-feature-heading" class="photo-feature__heading">Featured photos</h2>
+  <div class="photo-feature__stage">
+  <button type="button" class="photo-feature__edge" data-dir="-1" aria-label="Previous featured photos" disabled>&#10094;</button>
+  <div class="photo-feature__reel">
+  {% assign rank_label = 0 %}
+  {% for rank in (1..99) %}
+    {% for file in featured_files %}
+      {% assign meta = photos_data[file.name] %}
+      {% if meta.featured == rank %}
+      {% assign rank_label = rank_label | plus: 1 %}
+      {% assign thumb_path = file.path | replace: '/images/photos/', '/images/photos-thumb/' %}
+      <a href="{{ file.path | relative_url }}" class="photo-feature__item">
+        <span class="photo-feature__frame">
+          <img src="{{ thumb_path | relative_url }}" alt="{{ meta.caption | escape }}">
+        </span>
+        <span class="photo-feature__label">
+          <span class="photo-feature__num">{% if rank_label < 10 %}0{% endif %}{{ rank_label }}</span>
+          <span class="photo-feature__text">
+            {% if meta.caption %}<span class="photo-feature__title">{{ meta.caption }}</span>{% endif %}
+            {% if meta.location %}<span class="photo-feature__location">{{ meta.location }}</span>{% endif %}
+          </span>
+        </span>
+      </a>
+      {% endif %}
+    {% endfor %}
+  {% endfor %}
+  </div>
+  <button type="button" class="photo-feature__edge" data-dir="1" aria-label="Next featured photos" disabled>&#10095;</button>
+  </div>
+</section>
+
+<h2 class="photo-grid__heading">All photos <span class="photo-grid__count">{{ photo_files.size }}</span></h2>
+{% endif %}
+
 <div class="photo-grid">
 {% for file in photo_files %}
   {% assign meta = photos_data[file.name] %}
@@ -66,8 +110,62 @@ author_profile: true
 </script>
 {% endif %}
 
+{% if photo_files.size > 0 %}
+{% comment %}
+  Chromatic Geography: a classical-MDS embedding of pairwise Wasserstein
+  colour distances. Everything is precomputed by
+  scripts/chromatic_analysis.py into assets/data/chromatic-analysis.json;
+  initChromatic() in assets/js/_main.js only lays it out.
+{% endcomment %}
+<div id="chromatic" class="chroma" data-src="{{ '/assets/data/chromatic-analysis.json' | relative_url }}" data-baseurl="{{ site.baseurl }}">
+  <div class="chroma__head">
+    <div>
+      <h2 class="chroma__heading">Chromatic Geography</h2>
+      <p class="chroma__sub">A map of my photo gallery based on colour similarity. Click on a photo to see its five nearest colour neighbours!</p>
+    </div>
+    <div class="goo-toggle goo-toggle--small chroma__toggle" role="group" aria-label="Show photos as">
+      <div class="goo-toggle__goo">
+        <span class="goo-toggle__thumb-echo" aria-hidden="true"></span>
+        <span class="goo-toggle__thumb" aria-hidden="true"></span>
+      </div>
+      <button type="button" class="goo-toggle__btn is-active" data-view="images" aria-pressed="true">Images</button>
+      <button type="button" class="goo-toggle__btn" data-view="colours" aria-pressed="false">Colours</button>
+    </div>
+  </div>
+  <p class="chroma__status">Loading the map&hellip;</p>
+  <div class="chroma__map" hidden>
+    <svg class="chroma__axes" aria-hidden="true"></svg>
+    <svg class="chroma__lines" aria-hidden="true"></svg>
+    <div class="chroma__points" role="group" aria-label="Photos positioned by colour similarity"></div>
+    <svg class="chroma__axes chroma__axes--titles" aria-hidden="true"></svg>
+    <div class="chroma__tip" aria-hidden="true">
+      <img class="chroma__tip-img" alt="">
+      <span class="chroma__tip-title"></span>
+      <span class="chroma__tip-loc"></span>
+    </div>
+  </div>
+  <div class="chroma__panel" hidden aria-live="polite">
+    <div class="chroma__selected" hidden>
+      <div class="chroma__selected-head">
+        <p class="chroma__label">Nearest in colour to <button type="button" class="chroma__selected-title chroma__link"></button></p>
+        <button type="button" class="chroma__clear chroma__link">Clear</button>
+      </div>
+      <div class="chroma__neighbours"></div>
+    </div>
+  </div>
+
+  <details class="chroma__how">
+    <summary>How is this done?</summary>
+    <p>Each photo is analysed for its colour distribution and placed at a point in a higher-dimensional colour space. In this space, photos with similar colour palettes are grouped closer together. Every pair of photos is then compared and tested for how much colour would need to be moved (and how far) to turn one palette into the other. This gives rise to a notion of distance between photos based on colour, and one can project these distances down onto two-dimensional space. Note that the closest \(n\) neighbours aren't necessarily the closest in the 2D plane, but rather, the closest in the higher-dimensional colour space (the 2d projection doesn't preserve those distances perfectly!)</p>
+
+    <h3>Mathematical explanation:</h3>
+    <p>Each image is represented by a probability measure \(\mu_i\) over CIELAB colour space (separate into \(K\) colour buckets and normalise). Pairwise distances between photos are then measured using \(1\)-Wasserstein distance (with transport cost given by the usual Euclidean metric on CIELAB), yielding a distance matrix \(D_{ij}=W_1(\mu_i,\mu_j)\). Classical multidimensional scaling can then be applied to \(D\); writing \(J=I-\frac{1}{n}\mathbf{1}\mathbf{1}^\top\), one obtains a doubly-centered matrix \(B=-\frac{1}{2}J(D\circ D)J\). From here, perform an eigendecomposition to get \(B=V\Lambda V^\top\) and take only the leading two positive eigendirections \(X_{2D}=V_2\Lambda_2^{1/2}\). The resulting 2D projection approximates pairwise chromatic distances between photos.</p>
+  </details>
+</div>
+{% endif %}
+
 {% comment %}
   The lightbox + map behavior lives in assets/js/_main.js (initPhotoLightbox,
-  initPhotoMap), so it is re-initialized after in-page Swup navigations.
+  initPhotoMap, initChromatic), so it is re-initialized after in-page Swup navigations.
   See _includes/swup.html.
 {% endcomment %}

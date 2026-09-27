@@ -24,8 +24,8 @@ layout: compress
     {% endcomment %}
     <svg width="0" height="0" style="position: absolute; overflow: hidden;" aria-hidden="true" focusable="false">
       <defs>
-        <!-- "goo" / metaball filter for the research tab toggle (see /research/) -->
-        <filter id="research-tabs-goo">
+        <!-- "goo" / metaball filter for .goo-toggle switches (see _goo-toggle.scss) -->
+        <filter id="goo-toggle-filter">
           <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="goo-blur" />
           <feColorMatrix in="goo-blur" mode="matrix"
             values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo-sharp" />
