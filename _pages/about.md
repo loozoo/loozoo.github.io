@@ -21,49 +21,11 @@ relative algebraic geometry.
 
 Outside of all this, I'm the academic lead for [NZPMC](https://www.nzpmc.com/). And away from academic work entirely, I enjoy cycling, [taking photos]({{ "/photos/" | relative_url }}), and Geoguessr/[OSINT](https://www.cambridge.org/core/journals/european-journal-of-international-security/article/rise-of-opensource-intelligence/21122432399ECB8078BF0D89A76D0586)-style puzzles. If you want to know more about the latter two, have a go at guessing below.
 
-{% assign geo_files = site.static_files | where_exp: "file", "file.path contains '/images/photos/'" | sort: "name" %}
-{% assign geo_files = geo_files | where_exp: "file", "site.data.photos[file.name].visible != false" %}
-{% assign geo_points = geo_files | where_exp: "file", "site.data.photos[file.name].lat" | where_exp: "file", "site.data.photos[file.name].lng" %}
-{% if geo_points.size > 1 %}
-<section id="geo-game" class="geo-game" aria-label="Guess where my photos were taken">
-  <div class="geo-game__board">
-    <div class="geo-game__panel">
-      <figure class="geo-game__photo">
-        <img class="geo-game__photo-img" src="" alt="Photo to locate" decoding="async">
-        <figcaption class="geo-game__photo-caption" hidden>
-          <span class="geo-game__photo-name"></span>
-          <span class="geo-game__photo-place"></span>
-        </figcaption>
-      </figure>
+{% include chromatic-geography.html gallery_link=true compact=true %}
 
-      <div class="geo-game__bar">
-        <div class="geo-game__status">
-          <span class="geo-game__round"></span>
-          <span class="geo-game__score"></span>
-        </div>
-        <div class="geo-game__best" hidden></div>
-        <div class="geo-game__result">
-          <span class="geo-game__distance"></span>
-        </div>
-        <div class="geo-game__actions">
-          <button type="button" class="btn geo-game__guess" disabled>Guess</button>
-          <button type="button" class="btn geo-game__next" hidden>Next</button>
-        </div>
-      </div>
-    </div>
+{% include geo-game.html compact=true %}
 
-    <div class="geo-game__map-wrap">
-      <div id="geo-game-map" class="geo-game__map"></div>
-      <div class="geo-game__map-hint">Click the map to drop your guess</div>
-    </div>
-  </div>
-
-  <div class="geo-game__final" hidden>
-    <p class="geo-game__final-text"></p>
-    <button type="button" class="btn geo-game__replay">Play again</button>
-  </div>
-</section>
-
+{% comment %} Shared by both widgets above: photos open here full size. {% endcomment %}
 <div id="lightbox-overlay" class="lightbox-overlay">
   <span class="lightbox-overlay__close" aria-label="Close">&times;</span>
   <span class="lightbox-overlay__prev" aria-label="Previous photo">&#10094;</span>
@@ -75,25 +37,6 @@ Outside of all this, I'm the academic lead for [NZPMC](https://www.nzpmc.com/). 
   </div>
   <span class="lightbox-overlay__next" aria-label="Next photo">&#10095;</span>
 </div>
-
-<script type="application/json" id="geo-game-data">
-[
-{% for file in geo_points %}
-  {% assign meta = site.data.photos[file.name] %}
-  {% assign thumb_path = file.path | replace: '/images/photos/', '/images/photos-thumb/' %}
-  {
-    "thumb": {{ thumb_path | relative_url | jsonify }},
-    "full": {{ file.path | relative_url | jsonify }},
-    "caption": {{ meta.caption | jsonify }},
-    "location": {{ meta.location | jsonify }},
-    "date": {{ meta.date | jsonify }},
-    "lat": {{ meta.lat }},
-    "lng": {{ meta.lng }}
-  }{% unless forloop.last %},{% endunless %}
-{% endfor %}
-]
-</script>
-{% endif %}
 
 {% comment %}
   Featured "currently working on" teaser — hidden for now, re-enable by

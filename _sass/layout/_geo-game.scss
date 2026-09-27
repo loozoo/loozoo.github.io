@@ -6,6 +6,27 @@
   margin: 2.5em 0;
 }
 
+// In its collapsible section (_includes/geo-game.html) the section carries
+// the space above -- 2.5em like the others, so collapsed headings sit evenly.
+.geo-section {
+  margin-top: 2.5em;
+
+  .geo-game {
+    margin-top: 0;
+  }
+}
+
+.geo-game__heading {
+  margin-top: 0;
+}
+
+// One-line explainer, styled like Chromatic Geography's subtitle.
+.geo-section .geo-game__sub {
+  margin: 0 0 0.9em;
+  font-size: $type-size-6;
+  color: var(--global-text-color-light);
+}
+
 // The `.btn` class sets an explicit `display`, which would otherwise override
 // the plain `hidden` attribute used to toggle the buttons/panels below.
 .geo-game [hidden] {

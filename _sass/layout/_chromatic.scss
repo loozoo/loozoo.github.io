@@ -14,11 +14,25 @@
 
 .chroma__head {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 0.6em 1em;
   margin-bottom: 0.9em;
+
+  // Subtitle on the left (wrapping as needed), the Images | Colours switch
+  // on the right; they only stack on narrow screens.
+  > div:first-child {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .chroma__toggle {
+    flex: none;
+  }
+
+  @include breakpoint(max-width $small) {
+    flex-wrap: wrap;
+  }
 
   .chroma__sub {
     margin-bottom: 0;
@@ -29,10 +43,12 @@
   margin-top: 0;
 }
 
-.chroma__sub,
-.chroma__status,
-.chroma__hint,
-.chroma__label {
+// Scoped under .chroma to outrank `.page__content p { font-size: 1em }`, so
+// these read the same on the homepage as on /photos/.
+.chroma .chroma__sub,
+.chroma .chroma__status,
+.chroma .chroma__hint,
+.chroma .chroma__label {
   margin: 0 0 0.9em;
   font-size: $type-size-6;
   color: var(--global-text-color-light);

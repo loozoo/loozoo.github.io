@@ -494,6 +494,11 @@ function initPhotoLightbox() {
     var href = locationHref;
     var mapEl = document.getElementById("photo-map");
     closeLightbox();
+    // Open the Photo Map's section if it's been collapsed.
+    var section = mapEl.closest("details");
+    if (section && !section.open) {
+      section.open = true;
+    }
     mapEl.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
     // Fly once the scroll has (roughly) landed, so the flight is seen.
     if (mapEl.__showPhoto) {
@@ -1288,6 +1293,17 @@ function initPhotoMap() {
 
     photoMapTileLayer = photoMapBasemap().addTo(map);
 
+    // The map sits in a collapsible section; Leaflet can't measure itself
+    // while hidden, so re-measure whenever the section is opened.
+    var section = container.closest("details");
+    if (section) {
+      section.addEventListener("toggle", function () {
+        if (section.open) {
+          map.invalidateSize();
+        }
+      });
+    }
+
     var bounds = [];
     var markers = {};
     points.forEach(function (p) {
@@ -1484,6 +1500,16 @@ function initGeoGame() {
     }).setView([20, 0], 1);
     geoGameMapInstance = map;
     map.attributionControl.setPrefix(false);
+
+    // In a collapsible section: re-measure whenever it's opened.
+    var section = mapEl.closest("details");
+    if (section) {
+      section.addEventListener("toggle", function () {
+        if (section.open) {
+          map.invalidateSize();
+        }
+      });
+    }
 
     geoGameTileLayer = photoMapBasemap().addTo(map);
 
@@ -1684,6 +1710,45 @@ function redrawGeoGame() {
 }
 
 /* ==========================================================================
+   Collapsible sections on /photos/ (native <details class="photo-section">)
+   ========================================================================== */
+
+// Adds a quick fade to opening and closing (styles in _photo-grid.scss).
+// Opening just flags the section before the browser opens it; closing is
+// held back until the fade-out has run.
+function initPhotoSections() {
+  var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  document.querySelectorAll(".photo-section").forEach(function (section) {
+    var summary = section.querySelector(":scope > summary");
+    if (!summary || section.dataset.sectionInit) {
+      return;
+    }
+    section.dataset.sectionInit = "1";
+    var timer = null;
+
+    summary.addEventListener("click", function (e) {
+      if (reduceMotion) {
+        return;
+      }
+      window.clearTimeout(timer);
+      if (!section.open) {
+        section.classList.remove("is-closing");
+        section.classList.add("is-opening");
+        timer = window.setTimeout(function () { section.classList.remove("is-opening"); }, 250);
+        return; // the browser opens it
+      }
+      e.preventDefault();
+      section.classList.remove("is-opening");
+      section.classList.add("is-closing");
+      timer = window.setTimeout(function () {
+        section.classList.remove("is-closing");
+        section.open = false;
+      }, 150);
+    });
+  });
+}
+
+/* ==========================================================================
    Chromatic Geography (bottom of /photos/)
    ========================================================================== */
 
@@ -1783,25 +1848,37 @@ function buildChromatic(root, data) {
   var selectedTitle = root.querySelector(".chroma__selected-title");
   var neighboursEl = root.querySelector(".chroma__neighbours");
 
-  // Gallery items by filename, so photos open in the existing lightbox (with
-  // prev/next through the gallery). Photos hidden from the gallery since the
-  // analysis was last run are dropped rather than shown.
+  // Show the photos the gallery currently shows (a list rendered by
+  // _includes/chromatic-geography.html, keyed by filename), so any hidden
+  // since the analysis last ran are dropped; its captions and locations come
+  // from _data/photos.yml at build time, so they override the analysis's
+  // (possibly older) copies. On /photos/ photos open through their grid tile,
+  // i.e. in the gallery lightbox with prev/next; elsewhere on their own.
+  var visible = {};
+  try {
+    visible = JSON.parse(root.querySelector(".chroma__visible").textContent) || {};
+  } catch (e) { /* no list: nothing is shown, and the status says so */ }
   var gridItems = {};
   document.querySelectorAll(".photo-grid__item").forEach(function (item) {
     gridItems[chromaFileName(item.getAttribute("href"))] = item;
   });
-  var photos = data.photos.filter(function (p) { return gridItems[p.id]; });
+  var photos = data.photos.filter(function (p) { return visible[p.id]; });
+  photos.forEach(function (p) {
+    p.title = visible[p.id].caption || null;
+    p.location = visible[p.id].location || null;
+  });
   var byId = {};
   photos.forEach(function (p) { byId[p.id] = p; });
   if (photos.length < 3) {
     root.querySelector(".chroma__status").textContent = "The colour analysis is out of date.";
     return;
   }
-  var missing = Object.keys(gridItems).filter(function (id) { return !byId[id]; }).length;
+  var missing = Object.keys(visible).filter(function (id) { return !byId[id]; }).length;
   var missingNote = hint || root.querySelector(".chroma__sub");
   if (missing && missingNote) {
-    missingNote.textContent += " " + missing + (missing === 1 ? " newer photo isn't" : " newer photos aren't") +
-      " on the map yet.";
+    // Appended, not rewritten: the subtitle can hold a link.
+    missingNote.appendChild(document.createTextNode(" " + missing +
+      (missing === 1 ? " newer photo isn't" : " newer photos aren't") + " on the map yet."));
   }
 
   function title(p) {
@@ -1809,7 +1886,14 @@ function buildChromatic(root, data) {
   }
 
   function openPhoto(p) {
-    gridItems[p.id].click();
+    if (gridItems[p.id]) {
+      gridItems[p.id].click();
+      return;
+    }
+    var lightbox = window.__photoLightbox;
+    if (lightbox) {
+      lightbox.showSinglePhoto(base + p.src, p.title, p.location);
+    }
   }
 
   function thumb(p, className) {
@@ -2195,6 +2279,7 @@ function initPage() {
   initPhotoMap();
   initGeoGame();
   initChromatic();
+  initPhotoSections();
   initReadMore();
   renderMath();
   renderPlotly();

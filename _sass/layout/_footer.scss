@@ -58,4 +58,8 @@
 .page__footer-copyright {
   font-family: $global-font-family;
   font-size: $type-size-7;
+  // Half a line above and below keeps the footer its original two-line
+  // height (it used to carry a second "last updated / sitemap" line), with
+  // the one remaining line centred in it.
+  padding: 0.75em 0;
 }

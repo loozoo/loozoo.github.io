@@ -88,6 +88,101 @@ $photo-grid-hover-zoom: false;
 }
 
 /* ==========================================================================
+   COLLAPSIBLE SECTIONS (/photos/: All photos, Photo Map, Chromatic Geography)
+   Native <details open>; the summary is the section's own heading, so an open
+   section looks exactly as before, plus a small chevron after the title that
+   points down when open and right when collapsed.
+   ========================================================================== */
+
+// Child combinator: leaves nested <details> (Chromatic Geography's "How is
+// this done?") alone.
+.photo-section > .photo-section__summary {
+  display: block; // not list-item, so no default disclosure triangle
+  list-style: none;
+  cursor: pointer;
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+
+  &:focus {
+    outline: none;
+  }
+
+  // Same plain heading on every page (the homepage underlines its h2s).
+  h2 {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  &:focus-visible h2 {
+    outline: 2px solid var(--global-base-color);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+
+  h2::after {
+    content: "";
+    display: inline-block;
+    flex: none; // the All photos heading is a flex row
+    width: 0.32em;
+    height: 0.32em;
+    margin-left: 0.45em;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    color: var(--global-text-color-light);
+    opacity: 0.55;
+    transform: translateY(-0.2em) rotate(45deg);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+
+  &:hover h2::after {
+    opacity: 1;
+  }
+}
+
+// Quieter section titles where the sections sit among other content (the
+// homepage): body size rather than a full h2.
+.photo-section--compact > .photo-section__summary h2 {
+  font-size: 1em;
+}
+
+.photo-section:not([open]) > .photo-section__summary h2::after {
+  transform: translateY(-0.12em) rotate(-45deg);
+}
+
+// That heading is a flex row whose gap already spaces the chevron.
+.photo-section > .photo-section__summary .photo-grid__heading::after {
+  margin-left: 0;
+}
+
+// Opening and closing use the research tabs' panel motion (a 6px rise and
+// fade, see .research-panel): classes set by initPhotoSections() in _main.js
+// on click only, so nothing animates on page load.
+@keyframes photo-section-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.photo-section.is-opening > :not(summary) {
+  animation: photo-section-in 0.2s ease;
+}
+
+.photo-section.is-closing > :not(summary) {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .photo-section > .photo-section__summary h2::after {
+    transition: none;
+  }
+}
+
+/* ==========================================================================
    FEATURED REEL (top of /photos/)
    Set apart from the square grid below: photos keep their own aspect ratio,
    sit larger in their own panel, and carry always-visible numbered labels.
@@ -574,8 +669,15 @@ body.lightbox-open .masthead {
    PHOTO MAP
    ========================================================================== */
 
-.photo-map__heading {
+// The section, not its heading, carries the space above: 2.5em at body size,
+// the same as the Chromatic Geography section (.chroma), so the collapsed
+// section headings sit equally spaced.
+.photo-map-section {
   margin-top: 2.5em;
+}
+
+.photo-map__heading {
+  margin-top: 0;
 }
 
 .photo-map {

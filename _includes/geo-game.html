@@ -1,0 +1,71 @@
+{% comment %}
+  The photo location game, shared by the homepage and /photos/, in a
+  collapsible section like the others (.photo-section). Needs the page's
+  #lightbox-overlay (for viewing the photo full size); played by initGeoGame()
+  in assets/js/_main.js. Pass compact=true for a quieter, body-size title.
+{% endcomment %}
+{% assign geo_files = site.static_files | where_exp: "file", "file.path contains '/images/photos/'" | sort: "name" %}
+{% assign geo_files = geo_files | where_exp: "file", "site.data.photos[file.name].visible != false" %}
+{% assign geo_points = geo_files | where_exp: "file", "site.data.photos[file.name].lat" | where_exp: "file", "site.data.photos[file.name].lng" %}
+{% if geo_points.size > 1 %}
+<details class="photo-section geo-section{% if include.compact %} photo-section--compact{% endif %}" open>
+<summary class="photo-section__summary"><h2 class="geo-game__heading">Geoguessr</h2></summary>
+<p class="geo-game__sub">Guess where each photo was taken by dropping a pin on the map. The closer your geolocation, the more points you score.</p>
+<section id="geo-game" class="geo-game" aria-label="Guess where my photos were taken">
+  <div class="geo-game__board">
+    <div class="geo-game__panel">
+      <figure class="geo-game__photo">
+        <img class="geo-game__photo-img" src="" alt="Photo to locate" decoding="async">
+        <figcaption class="geo-game__photo-caption" hidden>
+          <span class="geo-game__photo-name"></span>
+          <span class="geo-game__photo-place"></span>
+        </figcaption>
+      </figure>
+
+      <div class="geo-game__bar">
+        <div class="geo-game__status">
+          <span class="geo-game__round"></span>
+          <span class="geo-game__score"></span>
+        </div>
+        <div class="geo-game__best" hidden></div>
+        <div class="geo-game__result">
+          <span class="geo-game__distance"></span>
+        </div>
+        <div class="geo-game__actions">
+          <button type="button" class="btn geo-game__guess" disabled>Guess</button>
+          <button type="button" class="btn geo-game__next" hidden>Next</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="geo-game__map-wrap">
+      <div id="geo-game-map" class="geo-game__map"></div>
+      <div class="geo-game__map-hint">Click the map to drop your guess</div>
+    </div>
+  </div>
+
+  <div class="geo-game__final" hidden>
+    <p class="geo-game__final-text"></p>
+    <button type="button" class="btn geo-game__replay">Play again</button>
+  </div>
+</section>
+</details>
+
+<script type="application/json" id="geo-game-data">
+[
+{% for file in geo_points %}
+  {% assign meta = site.data.photos[file.name] %}
+  {% assign thumb_path = file.path | replace: '/images/photos/', '/images/photos-thumb/' %}
+  {
+    "thumb": {{ thumb_path | relative_url | jsonify }},
+    "full": {{ file.path | relative_url | jsonify }},
+    "caption": {{ meta.caption | jsonify }},
+    "location": {{ meta.location | jsonify }},
+    "date": {{ meta.date | jsonify }},
+    "lat": {{ meta.lat }},
+    "lng": {{ meta.lng }}
+  }{% unless forloop.last %},{% endunless %}
+{% endfor %}
+]
+</script>
+{% endif %}

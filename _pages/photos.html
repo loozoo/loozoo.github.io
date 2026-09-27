@@ -52,7 +52,14 @@ author_profile: true
   </div>
 </section>
 
-<h2 class="photo-grid__heading">All photos <span class="photo-grid__count">{{ photo_files.size }}</span></h2>
+{% comment %}
+  The sections below (all but the featured reel) are collapsible: native
+  <details>, open by default, with the section's own heading as the clickable
+  summary -- styled in _photo-grid.scss (.photo-section) to look like a plain
+  heading plus a small chevron.
+{% endcomment %}
+<details class="photo-section" open>
+<summary class="photo-section__summary"><h2 class="photo-grid__heading">All Photos <span class="photo-grid__count">{{ photo_files.size }}</span></h2></summary>
 {% endif %}
 
 <div class="photo-grid">
@@ -74,7 +81,9 @@ author_profile: true
   </a>
 {% endfor %}
 </div>
+{% if featured_files.size > 0 %}</details>{% endif %}
 
+{% comment %} Outside every section: a closed <details> would hide it. {% endcomment %}
 <div id="lightbox-overlay" class="lightbox-overlay">
   <span class="lightbox-overlay__close" aria-label="Close">&times;</span>
   <span class="lightbox-overlay__prev" aria-label="Previous photo">&#10094;</span>
@@ -89,7 +98,8 @@ author_profile: true
 
 {% assign map_points = photo_files | where_exp: "file", "site.data.photos[file.name].lat" | where_exp: "file", "site.data.photos[file.name].lng" %}
 {% if map_points.size > 0 %}
-<h2 class="photo-map__heading">Photo Map</h2>
+<details class="photo-section photo-map-section" id="photo-map-section" open>
+<summary class="photo-section__summary"><h2 class="photo-map__heading">Photo Map</h2></summary>
 <div id="photo-map" class="photo-map"></div>
 <script type="application/json" id="photo-map-data">
 [
@@ -108,61 +118,12 @@ author_profile: true
 {% endfor %}
 ]
 </script>
+</details>
 {% endif %}
 
-{% if photo_files.size > 0 %}
-{% comment %}
-  Chromatic Geography: a classical-MDS embedding of pairwise Wasserstein
-  colour distances. Everything is precomputed by
-  scripts/chromatic_analysis.py into assets/data/chromatic-analysis.json;
-  initChromatic() in assets/js/_main.js only lays it out.
-{% endcomment %}
-<div id="chromatic" class="chroma" data-src="{{ '/assets/data/chromatic-analysis.json' | relative_url }}" data-baseurl="{{ site.baseurl }}">
-  <div class="chroma__head">
-    <div>
-      <h2 class="chroma__heading">Chromatic Geography</h2>
-      <p class="chroma__sub">A map of my photo gallery based on colour similarity. Click on a photo to see its five nearest colour neighbours!</p>
-    </div>
-    <div class="goo-toggle goo-toggle--small chroma__toggle" role="group" aria-label="Show photos as">
-      <div class="goo-toggle__goo">
-        <span class="goo-toggle__thumb-echo" aria-hidden="true"></span>
-        <span class="goo-toggle__thumb" aria-hidden="true"></span>
-      </div>
-      <button type="button" class="goo-toggle__btn is-active" data-view="images" aria-pressed="true">Images</button>
-      <button type="button" class="goo-toggle__btn" data-view="colours" aria-pressed="false">Colours</button>
-    </div>
-  </div>
-  <p class="chroma__status">Loading the map&hellip;</p>
-  <div class="chroma__map" hidden>
-    <svg class="chroma__axes" aria-hidden="true"></svg>
-    <svg class="chroma__lines" aria-hidden="true"></svg>
-    <div class="chroma__points" role="group" aria-label="Photos positioned by colour similarity"></div>
-    <svg class="chroma__axes chroma__axes--titles" aria-hidden="true"></svg>
-    <div class="chroma__tip" aria-hidden="true">
-      <img class="chroma__tip-img" alt="">
-      <span class="chroma__tip-title"></span>
-      <span class="chroma__tip-loc"></span>
-    </div>
-  </div>
-  <div class="chroma__panel" hidden aria-live="polite">
-    <div class="chroma__selected" hidden>
-      <div class="chroma__selected-head">
-        <p class="chroma__label">Nearest in colour to <button type="button" class="chroma__selected-title chroma__link"></button></p>
-        <button type="button" class="chroma__clear chroma__link">Clear</button>
-      </div>
-      <div class="chroma__neighbours"></div>
-    </div>
-  </div>
+{% include chromatic-geography.html %}
 
-  <details class="chroma__how">
-    <summary>How is this done?</summary>
-    <p>Each photo is analysed for its colour distribution and placed at a point in a higher-dimensional colour space. In this space, photos with similar colour palettes are grouped closer together. Every pair of photos is then compared and tested for how much colour would need to be moved (and how far) to turn one palette into the other. This gives rise to a notion of distance between photos based on colour, and one can project these distances down onto two-dimensional space. Note that the closest \(n\) neighbours aren't necessarily the closest in the 2D plane, but rather, the closest in the higher-dimensional colour space (the 2d projection doesn't preserve those distances perfectly!)</p>
-
-    <h3>Mathematical explanation:</h3>
-    <p>Each image is represented by a probability measure \(\mu_i\) over CIELAB colour space (separate into \(K\) colour buckets and normalise). Pairwise distances between photos are then measured using \(1\)-Wasserstein distance (with transport cost given by the usual Euclidean metric on CIELAB), yielding a distance matrix \(D_{ij}=W_1(\mu_i,\mu_j)\). Classical multidimensional scaling can then be applied to \(D\); writing \(J=I-\frac{1}{n}\mathbf{1}\mathbf{1}^\top\), one obtains a doubly-centered matrix \(B=-\frac{1}{2}J(D\circ D)J\). From here, perform an eigendecomposition to get \(B=V\Lambda V^\top\) and take only the leading two positive eigendirections \(X_{2D}=V_2\Lambda_2^{1/2}\). The resulting 2D projection approximates pairwise chromatic distances between photos.</p>
-  </details>
-</div>
-{% endif %}
+{% include geo-game.html %}
 
 {% comment %}
   The lightbox + map behavior lives in assets/js/_main.js (initPhotoLightbox,
