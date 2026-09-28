@@ -3,6 +3,7 @@
   Parameters:
     gallery_link=true  link "photo gallery" in the subtitle to /photos/.
     compact=true       quieter, body-size section title (the homepage).
+    widget=true        in its own card, like the homepage's other widgets.
   The visible-photo list below is what the widget shows (photos hidden since
   the analysis last ran are dropped), with captions and locations straight
   from _data/photos.yml so they're current even if the analysis isn't. On
@@ -18,27 +19,25 @@
   scripts/chromatic_analysis.py into assets/data/chromatic-analysis.json;
   initChromatic() in assets/js/_main.js only lays it out.
 {% endcomment %}
-<div id="chromatic" class="chroma" data-src="{{ '/assets/data/chromatic-analysis.json' | relative_url }}" data-baseurl="{{ site.baseurl }}">
+<div id="chromatic" class="chroma{% if include.widget %} chroma--widget{% endif %}" data-src="{{ '/assets/data/chromatic-analysis.json' | relative_url }}" data-baseurl="{{ site.baseurl }}">
   <script type="application/json" class="chroma__visible">
     { {% for file in chroma_files %}{% assign meta = site.data.photos[file.name] %}{{ file.name | jsonify }}: { "caption": {{ meta.caption | jsonify }}, "location": {{ meta.location | jsonify }} }{% unless forloop.last %}, {% endunless %}{% endfor %} }
   </script>
-  <details class="photo-section{% if include.compact %} photo-section--compact{% endif %}" open>
+  <details class="photo-section{% if include.compact %} photo-section--compact{% endif %}{% if include.widget %} photo-section--widget{% endif %}" open>
   <summary class="photo-section__summary"><h2 class="chroma__heading">Chromatic Map</h2></summary>
   <div class="chroma__head">
     <div>
-      <p class="chroma__sub">A map of my {% if include.gallery_link %}<a href="{{ '/photos/' | relative_url }}">photo gallery</a>{% else %}photo gallery{% endif %} based on colour similarity. Click on a photo to see its five nearest colour neighbours!</p>
-    </div>
-    <div class="goo-toggle goo-toggle--small chroma__toggle" role="group" aria-label="Show photos as">
-      <div class="goo-toggle__goo">
-        <span class="goo-toggle__thumb-echo" aria-hidden="true"></span>
-        <span class="goo-toggle__thumb" aria-hidden="true"></span>
-      </div>
-      <button type="button" class="goo-toggle__btn is-active" data-view="images" aria-pressed="true">Images</button>
-      <button type="button" class="goo-toggle__btn" data-view="colours" aria-pressed="false">Colours</button>
+      <p class="chroma__sub">A map of my {% if include.gallery_link %}<a href="{{ '/photos/' | relative_url }}">photo gallery</a>{% else %}photo gallery{% endif %} based on colour similarity. This 2D projection tries to preserve chromatic distance between images. Click on a photo to see its five nearest colour neighbours!</p>
     </div>
   </div>
   <p class="chroma__status">Loading the map&hellip;</p>
   <div class="chroma__map" hidden>
+    {% comment %} In the map's top-right corner, over a band layout() keeps clear of photos. {% endcomment %}
+    <div class="switch switch--{{ site.switch_style | default: "marker" }} switch--small chroma__toggle" role="group" aria-label="Show photos as">
+      <span class="switch__mark" aria-hidden="true"></span>
+      <button type="button" class="switch__btn is-active" data-view="images" aria-pressed="true">Images</button>
+      <button type="button" class="switch__btn" data-view="colours" aria-pressed="false">Colours</button>
+    </div>
     <svg class="chroma__axes" aria-hidden="true"></svg>
     <svg class="chroma__lines" aria-hidden="true"></svg>
     <div class="chroma__points" role="group" aria-label="Photos positioned by colour similarity"></div>

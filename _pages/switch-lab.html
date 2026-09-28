@@ -1,0 +1,61 @@
+---
+layout: archive
+title: "Switch lab"
+permalink: /switch-lab/
+author_profile: true
+sitemap: false
+---
+
+{% comment %}
+  Scratch page for comparing the .switch styles (_sass/layout/_switch.scss).
+  Pick one with `switch_style` in _config.yml, then delete this page.
+{% endcomment %}
+
+<style>
+  .switch-lab { margin-top: 1em; }
+  .switch-lab__row {
+    display: grid;
+    grid-template-columns: 7em 1fr;
+    gap: 0.4em 1.5em;
+    align-items: center;
+    padding: 1.4em 0;
+    border-top: 1px solid var(--global-border-color);
+  }
+  .switch-lab__name { font-size: 0.9em; font-weight: 600; }
+  .switch-lab__name small { display: block; font-weight: 400; color: var(--global-text-color-light); }
+  .switch-lab__demos { display: flex; flex-wrap: wrap; align-items: center; gap: 1.5em 2.5em; }
+  .switch-lab__note { grid-column: 2; margin: 0; font-size: 0.75em; color: var(--global-text-color-light); }
+  @media (max-width: 600px) {
+    .switch-lab__row { grid-template-columns: 1fr; }
+    .switch-lab__note { grid-column: 1; }
+  }
+</style>
+
+{% assign current = site.switch_style | default: "marker" %}
+<p>Click anywhere on a switch to flip it, and use the theme toggle to check dark mode. The site currently uses <strong>{{ current }}</strong>.</p>
+
+{% assign styles = "rule|Inchworm underline: the accent line stretches toward the new option before its tail catches up.;brackets|Corner brackets frame the active option and stretch across to the next.;block|Hard-edged box matching the site's hairline borders. The block inverts the text as its edge crosses it.;marker|A highlighter stroke that is dragged across to the new option, stretching on the way." | split: ";" %}
+
+<div class="switch-lab">
+  {% for entry in styles %}
+    {% assign parts = entry | split: "|" %}
+    {% assign key = parts[0] %}
+    <div class="switch-lab__row">
+      <div class="switch-lab__name">{{ key | capitalize }}{% if key == current %}<small>current</small>{% endif %}</div>
+      <div class="switch-lab__demos">
+        <div class="switch switch--{{ key }}" role="tablist">
+          <span class="switch__mark" aria-hidden="true"></span>
+          {% for category in site.publication_category %}
+            <button type="button" role="tab" class="switch__btn{% if forloop.first %} is-active{% endif %}">{{ category[1].title }}</button>
+          {% endfor %}
+        </div>
+        <div class="switch switch--{{ key }} switch--small" role="group" aria-label="Show photos as">
+          <span class="switch__mark" aria-hidden="true"></span>
+          <button type="button" class="switch__btn is-active" aria-pressed="true">Images</button>
+          <button type="button" class="switch__btn" aria-pressed="false">Colours</button>
+        </div>
+      </div>
+      <p class="switch-lab__note">{{ parts[1] }}</p>
+    </div>
+  {% endfor %}
+</div>

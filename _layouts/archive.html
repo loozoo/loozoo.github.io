@@ -17,8 +17,13 @@ layout: default
 
   <div class="archive" id="page-content">
     {% unless page.header.overlay_color or page.header.overlay_image or page.hide_title %}
-      <h1 class="page__title">{{ page.title }}</h1>
+      <h1 class="page__title{% if page.compact_title %} page__title--compact{% endif %}">{{ page.title }}</h1>
     {% endunless %}
+    {% if page.hide_title == "keep-space" %}
+      {% comment %} Title hidden, but its space kept: the page starts exactly
+         where it would under a visible title. {% endcomment %}
+      <h1 class="page__title" aria-hidden="true" style="visibility: hidden;">{{ page.title }}</h1>
+    {% endif %}
     {{ content }}
   </div>
 </div>

@@ -1,0 +1,37 @@
+{% include base_path %}
+{% comment %}
+  Phones and portrait tablets (below $large): the top navbar and the profile
+  block give way to this -- a small menu button in the corner, opening a left
+  sidebar with the profile, the site's pages, the contact links and the theme
+  toggle. Hidden from $large up, where the navbar and sidebar are as ever.
+  Lives in the persistent shell (outside Swup's #page-content), so it's bound
+  once, by initMobileSidebar() in assets/js/_main.js; styles in
+  _sass/layout/_mobile-sidebar.scss.
+{% endcomment %}
+<button type="button" class="msb-toggle" aria-controls="mobile-sidebar" aria-expanded="false" aria-label="Open menu">
+  <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true">
+    <rect class="msb-toggle__bar msb-toggle__bar--top" x="2" y="4" width="16" height="2"/>
+    <rect class="msb-toggle__bar msb-toggle__bar--mid" x="2" y="9" width="16" height="2"/>
+    <rect class="msb-toggle__bar msb-toggle__bar--bot" x="2" y="14" width="16" height="2"/>
+  </svg>
+</button>
+
+<div class="msb-backdrop" aria-hidden="true"></div>
+
+<aside id="mobile-sidebar" class="msb" aria-label="Menu">
+  <div class="msb__profile">{% include author-profile.html %}</div>
+
+  <nav class="msb__nav" aria-label="Pages">
+    <a href="{{ '/' | relative_url }}">About</a>
+    {% for link in site.data.navigation.main %}
+      <a href="{% if link.url contains 'http' %}{{ link.url }}{% else %}{{ link.url | relative_url }}{% endif %}">{{ link.title }}</a>
+    {% endfor %}
+  </nav>
+
+  <button type="button" class="msb__theme">
+    <i class="fa-solid fa-moon msb__theme-icon msb__theme-icon--dark" aria-hidden="true"></i>
+    <i class="fa-solid fa-sun msb__theme-icon msb__theme-icon--light" aria-hidden="true"></i>
+    <span class="msb__theme-label msb__theme-label--dark">Dark mode</span>
+    <span class="msb__theme-label msb__theme-label--light">Light mode</span>
+  </button>
+</aside>

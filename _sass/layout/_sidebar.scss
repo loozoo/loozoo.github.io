@@ -40,6 +40,15 @@
     padding-right: 0;
   }
 
+  // Fixed, so a percentage width would be of the window, not the page: on a
+  // laptop that made it wider than its two grid columns and the photo ran up
+  // against the text. Sized from the page's own width instead (--page-w, less
+  // #main's 1em padding each side), so it's exactly two of its columns and
+  // the half-column gap to the text always holds.
+  @media screen and (min-width: $sidebar-screen-min-width) {
+    width: calc((var(--page-w) - 2em) / 6);
+  }
+
   h2, h3, h4, h5, h6 {
     margin-bottom: 0;
     font-family: $sans-serif-narrow;

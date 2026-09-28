@@ -3,6 +3,7 @@ layout: archive
 title: "Gallery"
 permalink: /photos/
 author_profile: true
+hide_title: keep-space
 ---
 
 {% include base_path %}
@@ -14,14 +15,19 @@ author_profile: true
 {% comment %}
   Featured reel: photos with `featured: <n>` in _data/photos.yml, ordered by n.
   Each tile links to the same full-size path as its grid tile, so
-  initPhotoLightbox() in _main.js opens it at its place in the main gallery
-  sequence rather than counting it twice. The edge buttons either side of the
-  reel, and smooth wheel scrolling, are wired up by initPhotoFeature().
+  initPhotoLightbox() in _main.js reuses that photo's slide, stepping through
+  the featured photos only (in reel order). The edge bars either side of the
+  reel, and smooth wheel scrolling, are wired up by initPhotoFeature(), which
+  also measures each photo's colour palette and paints it into its
+  .photo-feature__palette strip.
 {% endcomment %}
 {% assign featured_files = photo_files | where_exp: "file", "photos_data[file.name].featured" %}
 {% if featured_files.size > 0 %}
 <section class="photo-feature" aria-labelledby="photo-feature-heading">
-  <h2 id="photo-feature-heading" class="photo-feature__heading">Featured photos</h2>
+  <div class="photo-feature__head">
+    <h2 id="photo-feature-heading" class="photo-feature__heading">Featured photos</h2>
+    <span class="photo-feature__rule" aria-hidden="true"></span>
+  </div>
   <div class="photo-feature__stage">
   <button type="button" class="photo-feature__edge" data-dir="-1" aria-label="Previous featured photos" disabled>&#10094;</button>
   <div class="photo-feature__reel">
@@ -36,6 +42,7 @@ author_profile: true
         <span class="photo-feature__frame">
           <img src="{{ thumb_path | relative_url }}" alt="{{ meta.caption | escape }}">
         </span>
+        <span class="photo-feature__palette" aria-hidden="true"></span>
         <span class="photo-feature__label">
           <span class="photo-feature__num">{% if rank_label < 10 %}0{% endif %}{{ rank_label }}</span>
           <span class="photo-feature__text">
@@ -59,7 +66,7 @@ author_profile: true
   heading plus a small chevron.
 {% endcomment %}
 <details class="photo-section" open>
-<summary class="photo-section__summary"><h2 class="photo-grid__heading">All Photos <span class="photo-grid__count">{{ photo_files.size }}</span></h2></summary>
+<summary class="photo-section__summary"><h2 class="photo-grid__heading">Gallery <span class="photo-grid__count">{{ photo_files.size }}</span></h2></summary>
 {% endif %}
 
 <div class="photo-grid">

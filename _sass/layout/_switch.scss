@@ -1,0 +1,243 @@
+/* ==========================================================================
+   SWITCH
+   The option switch (research tabs, Chromatic Map's Images | Colours).
+   initSwitch() in _main.js writes the active button's edges to --switch-l /
+   --switch-r (px in from the switch's left / right) and the direction of the
+   last move to data-dir; each style's .switch__mark follows those edges.
+   The site-wide style is `switch_style` in _config.yml; /switch-lab/ shows
+   them side by side. The old goo pill is archived in _templates/goo-toggle/.
+   ========================================================================== */
+
+.switch {
+  --switch-l: 0px;
+  --switch-r: 100%;
+  --switch-time: 0.3s;
+  --switch-lag: 0.09s;
+  --switch-ease: cubic-bezier(0.65, 0, 0.35, 1);
+
+  position: relative;
+  display: inline-flex;
+  font-family: $sans-serif-narrow;
+  font-size: $type-size-6;
+  cursor: pointer;
+  user-select: none;
+}
+
+// Everything is in em, so one font-size scales the whole switch.
+.switch--small {
+  font-size: $type-size-6 * 0.8;
+}
+
+.switch__btn {
+  position: relative;
+  z-index: 1;
+  padding: 0.4em 0.85em;
+  border: 0;
+  background: transparent;
+  color: var(--global-text-color-light);
+  font: inherit;
+  cursor: pointer;
+  transition: color 0.2s ease;
+
+  &:hover,
+  &.is-active {
+    color: var(--global-text-color);
+  }
+
+  &:focus-visible {
+    outline: 1px solid var(--global-base-color);
+    outline-offset: 2px;
+  }
+}
+
+// Inchworm: the edge nearest the destination sets off first and the trailing
+// edge follows a beat later, so the mark stretches, then gathers itself up.
+.switch__mark {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  bottom: 0;
+  left: var(--switch-l);
+  right: var(--switch-r);
+  pointer-events: none;
+  transition-property: left, right;
+  transition-duration: var(--switch-time);
+  transition-timing-function: var(--switch-ease);
+}
+
+.switch[data-dir="right"] .switch__mark {
+  transition-delay: var(--switch-lag), 0s;
+}
+
+.switch[data-dir="left"] .switch__mark {
+  transition-delay: 0s, var(--switch-lag);
+}
+
+/* Rule: a short accent underline that inches along a faint baseline.
+   ========================================================================== */
+
+.switch--rule {
+  gap: 1.2em;
+  box-shadow: inset 0 -1px 0 var(--global-hover-color);
+
+  .switch__btn {
+    padding: 0.35em 0.1em 0.5em;
+  }
+
+  .switch__mark {
+    top: auto;
+    height: 2px;
+    background: var(--global-base-color);
+  }
+}
+
+/* Brackets: corner brackets that frame the active option and stretch across
+   to the next one.
+   ========================================================================== */
+
+.switch--brackets {
+  .switch__mark::before,
+  .switch__mark::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 0.4em;
+    border: 1.5px solid var(--global-base-color);
+  }
+
+  .switch__mark::before {
+    left: 0;
+    border-right: 0;
+  }
+
+  .switch__mark::after {
+    right: 0;
+    border-left: 0;
+  }
+}
+
+/* Block: a hard-edged segmented box (matching the site's hairline borders).
+   The block inverts whatever it passes over via mix-blend-mode, so a label
+   flips colour exactly where the block's edge crosses it, in either theme.
+   ========================================================================== */
+
+.switch--block {
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid var(--global-border-color);
+  border-radius: 3px;
+  background: var(--global-bg-color);
+
+  .switch__btn {
+    padding: 0.45em 1.1em;
+  }
+
+  .switch__btn + .switch__btn {
+    box-shadow: inset 1px 0 0 var(--global-border-color);
+  }
+
+  .switch__mark {
+    z-index: 2;
+    background: #fff;
+    mix-blend-mode: difference;
+  }
+}
+
+/* Marker: a hand-drawn highlighter scrawl that is dragged across to the new
+   option, stretching on the way (the shared inchworm motion).
+   ========================================================================== */
+
+// A scrawl is two overlapping pen passes with wobbly edges and ragged ends,
+// used as an alpha mask over the accent colour, so it stays themeable and the
+// overlap comes out darker, like highlighter ink laid down twice. The SVG
+// stretches (preserveAspectRatio none) with the mark. initSwitch() picks a
+// new one on every flip via data-scrawl.
+@function switch-scrawl($pass-a, $pass-b) {
+  @return url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 24' preserveAspectRatio='none'%3E%3Cpath fill-opacity='.75' d='#{$pass-a}'/%3E%3Cpath fill-opacity='.5' d='#{$pass-b}'/%3E%3C/svg%3E");
+}
+
+$switch-scrawls: (
+  1: switch-scrawl(
+    "M3 7C20 5 45 6.5 70 5S93 4.5 97 5.5L98.5 9 96 16C80 17.5 55 16 30 17.5S8 18.5 2 17L1 12Z",
+    "M6 11C30 9.5 60 12 95 9L97 13 94 20C70 21 40 19 8 21L5 16Z"
+  ),
+  2: switch-scrawl(
+    "M2 10C25 8 55 6 97 3.5L99 8 97 15C60 16 30 18 3 20.5L1 15Z",
+    "M5 6C35 7 70 5 96 7.5L95 12.5C70 13.5 35 12 6 13.5L4 9Z"
+  ),
+  3: switch-scrawl(
+    "M3 4C30 6 65 8 97 8.5L98.5 12 97 15.5C65 15 35 14 2 13L1 8Z",
+    "M4 13C30 12 60 9 95 6.5L97.5 11 95 18.5C60 19 30 20 5 20.5L2.5 17Z"
+  )
+);
+
+@mixin switch-scrawl-shape($n) {
+  -webkit-mask-image: map-get($switch-scrawls, $n);
+  mask-image: map-get($switch-scrawls, $n);
+}
+
+.switch--marker {
+  gap: 0.35em;
+
+  .switch__btn {
+    padding: 0.35em 0.45em;
+    line-height: 1.4;
+  }
+
+  // Centred on the lowercase letters (the button is 2.1em tall with the
+  // baseline 1.43em down), overhanging a little since the ragged mask
+  // edges eat into it.
+  .switch__mark,
+  .switch__btn::before {
+    top: 0.7em;
+    bottom: 0.5em;
+    background: var(--global-base-color);
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    @include switch-scrawl-shape(1);
+  }
+
+  .switch__mark {
+    opacity: 0.65;
+  }
+
+  // Hovering an inactive option previews a faint scrawl under it, so the
+  // other option reads as something you can click.
+  .switch__btn::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    left: 0;
+    right: 0;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .switch__btn:not(.is-active):hover::before {
+    opacity: 0.22;
+  }
+
+  @each $n in (2, 3) {
+    &[data-scrawl="#{$n}"] .switch__mark,
+    &[data-scrawl="#{$n}"] .switch__btn::before {
+      @include switch-scrawl-shape($n);
+    }
+  }
+}
+
+/* Placement without animation (first paint, resize) and reduced motion.
+   ========================================================================== */
+
+.switch.is-static,
+.switch.is-static * {
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .switch__mark {
+    transition: none !important;
+  }
+}

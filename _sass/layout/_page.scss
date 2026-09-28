@@ -4,6 +4,7 @@
 
 #main {
   @include container;
+  @include page-max-width;
   @include clearfix;
   /* sticky footer fix: guarantee at least one viewport's worth of height so a
      short page's footer still lands at the bottom instead of riding up under
@@ -14,17 +15,15 @@
   padding-right: 1em;
   animation: intro 0.3s both;
   animation-delay: 0.35s;
-
-  @include breakpoint($x-large) {
-    max-width: $x-large;
-  }
 }
 
 .page {
   @include breakpoint($large) {
     @include span(10 of 12 last);
     @include prefix(0.5 of 12);
-    @include suffix(2 of 12);
+    // One empty column on the right, not two: with two, the homepage sat
+    // lopsided -- sidebar at the left edge, a wide blank on the right.
+    @include suffix(1 of 12);
   }
 
   .page__inner-wrap {
@@ -45,6 +44,13 @@
   & + .page__meta {
     margin-top: -0.5em;
   }
+}
+
+// `compact_title: true` in front matter (/teaching/): a quieter title, closer
+// in weight to /research/'s tabs than a full page heading.
+.page__title--compact {
+  margin-bottom: 1em;
+  font-size: $type-size-4;
 }
 
 .page__lead {
@@ -136,10 +142,7 @@
     .wrapper {
       padding-left: 1em;
       padding-right: 1em;
-
-      @include breakpoint($x-large) {
-        max-width: $x-large;
-      }
+      @include page-max-width; // matches #main
     }
 
     .page__title,

@@ -1,6 +1,15 @@
 /* ==========================================================================
    BASE ELEMENTS
    ========================================================================== */
+:root {
+  /* The page containers' width (see page-max-width in _mixins.scss): the
+     window less a margin each side that grows with it -- none on phones,
+     ~38px at 1024px, ~64px at 1280px -- up to $x-large (from ~1440px), past
+     which auto margins take over. Continuous, so no width jumps a layout. A
+     plain CSS string, since Sass would otherwise try to evaluate min()/clamp(). */
+  --page-w: #{unquote("min(#{$x-large}, 100vw - 2 * clamp(0px, 10vw - 64px, 160px))")};
+}
+
 html {
   /* sticky footer fix */
   position: relative;

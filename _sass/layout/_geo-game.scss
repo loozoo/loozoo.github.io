@@ -14,6 +14,11 @@
   .geo-game {
     margin-top: 0;
   }
+
+  // In a widget card the card's own padding closes it off.
+  &.photo-section--widget .geo-game {
+    margin-bottom: 0;
+  }
 }
 
 .geo-game__heading {
@@ -125,8 +130,7 @@
 }
 
 .geo-game__photo-place {
-  display: block;
-  font-size: 0.72rem;
+  @include photo-place;
   opacity: 0.85;
 
   &:empty {
@@ -200,6 +204,20 @@
 
   .leaflet-popup-content {
     margin: 0.75em;
+  }
+
+  // The photo is already shown full-size beside the map, so the reveal popup
+  // only needs a compact preview. A fixed height (rather than the photo map's
+  // natural aspect) keeps a portrait shot from covering this short map, and
+  // gives fitRevealView() a stable size to measure before the image loads.
+  .photo-map__popup {
+    max-width: 140px;
+
+    img {
+      width: 140px;
+      height: 80px;
+      object-fit: cover;
+    }
   }
 }
 

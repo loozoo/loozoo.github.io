@@ -23,6 +23,17 @@
    ========================================================================== */
 
 /*
+  Width of the page's centred containers -- #main, the masthead, footer and
+  breadcrumbs, all identical so the home icon, sidebar and footer line up.
+  It's --page-w (set on :root in _base.scss): the window less a margin that
+  grows with it, up to $x-large. The fixed sidebar is sized from the same
+  value (see _sidebar.scss), so it always fits its two grid columns.
+*/
+@mixin page-max-width {
+  max-width: var(--page-w);
+}
+
+/*
   A light diagonal crosshatch, layered as a background-image so it sits on
   top of whatever background-color/background is already set. Include this
   AFTER the element's own background declaration, since the `background`
@@ -84,4 +95,24 @@
     content: "";
     display: table;
   }
+}
+
+/*
+   Photo place
+   ========================================================================== */
+
+/*
+   A photo's location, set in small caps under its (semibold) title, the same
+   wherever a photo is labelled: the featured reel, the lightbox, the gallery
+   grid's hover caption, the Photo Map popup, the Chromatic Map tooltip and
+   the geo-game reveal. Colour and opacity stay with each context.
+*/
+
+@mixin photo-place($size: 0.62rem) {
+  display: block;
+  margin-top: 0.25em;
+  font-size: $size;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }

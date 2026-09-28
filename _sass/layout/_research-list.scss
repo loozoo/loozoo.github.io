@@ -10,8 +10,11 @@ $research-description-font-size: 0.85em;
   margin-bottom: 2em;
 }
 
-.research-tabs {
+// The tabs are the page's main control, so they sit at body-text size (the
+// switch is all em, so this scales the marker too).
+.switch.research-tabs {
   margin-bottom: 1.5em;
+  font-size: $type-size-5;
 }
 
 .research-panel {

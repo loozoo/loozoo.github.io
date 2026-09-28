@@ -152,126 +152,104 @@ function redrawPlotly() {
 }
 
 /* ==========================================================================
-   Goo toggle -- fluid "metaball" pill switch (research tabs, /photos/)
+   Option switch (research tabs, Chromatic Map) -- see _switch.scss
    ========================================================================== */
 
-// Sets up one .goo-toggle bar (see _goo-toggle.scss). onSelect(btn) runs each
-// time a button becomes the active one, as the pill starts moving to it.
-function initGooToggle(wrap, onSelect) {
-  if (!wrap || wrap.dataset.gooInit) {
+// Sets up one .switch. onSelect(btn) runs each time a button becomes the
+// active one, as the mark starts moving to it.
+function initSwitch(wrap, onSelect) {
+  if (!wrap || wrap.dataset.switchInit) {
     return;
   }
-  var tabs = wrap.querySelectorAll('.goo-toggle__btn');
-  var thumb = wrap.querySelector('.goo-toggle__thumb');
-  var echo = wrap.querySelector('.goo-toggle__thumb-echo');
-  if (!tabs.length) {
+  var btns = wrap.querySelectorAll('.switch__btn');
+  if (!btns.length) {
     return;
   }
-  wrap.dataset.gooInit = '1';
+  wrap.dataset.switchInit = '1';
 
-  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var thumbLeft = 0;
-  var thumbWidth = 0;
-  var echoCleanupTimer;
+  var markLeft = null;
 
-  function setRect(el, left, width) {
-    el.style.width = width + 'px';
-    el.style.transform = 'translateX(' + left + 'px)';
+  // Picks one of the three scrawl shapes (see .switch--marker), never the
+  // same one twice running, so each flip looks like a fresh pen stroke.
+  function rescrawl() {
+    var prev = +wrap.dataset.scrawl || 0;
+    var next = 1 + Math.floor(Math.random() * (prev ? 2 : 3));
+    wrap.dataset.scrawl = prev && next >= prev ? next + 1 : next;
   }
 
-  // The thumb morphs into the echo's spot like a dumbbell, then the neck
-  // between them thins and pinches off as the echo streams to the destination
-  // and collapses (an SVG "goo" filter on the shared wrapper blurs the two
-  // blobs together and re-sharpens the edge, so it reads as one liquid body).
-  function moveThumb(btn, animate) {
-    if (!thumb || !btn) {
-      return;
-    }
+  // Publishes btn's edges for the CSS to follow. The styles do all the motion.
+  function place(btn, animate) {
     var left = btn.offsetLeft;
-    var width = btn.offsetWidth;
-
-    if (!animate || reduceMotion || !echo) {
-      thumb.style.transition = 'none';
-      setRect(thumb, left, width);
-      void thumb.offsetWidth;
-      thumb.style.transition = '';
-      thumbLeft = left;
-      thumbWidth = width;
-      return;
+    var right = wrap.clientWidth - left - btn.offsetWidth;
+    if (animate && markLeft !== null && left !== markLeft) {
+      wrap.dataset.dir = left > markLeft ? 'right' : 'left';
     }
-
-    var prevLeft = thumbLeft;
-    var prevWidth = thumbWidth;
-    var destCenter = left + width / 2;
-
-    window.clearTimeout(echoCleanupTimer);
-    // Seed the trailing lobe exactly where the thumb was.
-    echo.style.transition = 'none';
-    echo.style.opacity = '1';
-    setRect(echo, prevLeft, prevWidth);
-    void echo.offsetWidth;
-    echo.style.transition = '';
-
-    setRect(thumb, left, width);
-    thumbLeft = left;
-    thumbWidth = width;
-
-    requestAnimationFrame(function () {
-      // The tail streams toward the destination and shrinks to nothing
-      // *there*, so it's swallowed by the leading lobe instead of pinching
-      // off and leaving a dying dot on the old option.
-      setRect(echo, destCenter, 0);
-      echo.style.opacity = '0';
-    });
-
-    echoCleanupTimer = window.setTimeout(function () {
-      echo.style.transition = 'none';
-      setRect(echo, destCenter, 0);
-    }, 550);
+    if (!animate) {
+      wrap.classList.add('is-static');
+    }
+    wrap.style.setProperty('--switch-l', left + 'px');
+    wrap.style.setProperty('--switch-r', right + 'px');
+    if (!animate) {
+      void wrap.offsetWidth;
+      wrap.classList.remove('is-static');
+    }
+    markLeft = left;
   }
 
   function select(btn) {
-    tabs.forEach(function (t) {
-      var on = t === btn;
-      t.classList.toggle('is-active', on);
-      if (t.hasAttribute('aria-pressed')) {
-        t.setAttribute('aria-pressed', on ? 'true' : 'false');
+    btns.forEach(function (b) {
+      var on = b === btn;
+      b.classList.toggle('is-active', on);
+      if (b.hasAttribute('aria-pressed')) {
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
+      if (b.hasAttribute('aria-selected')) {
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
       }
     });
-    moveThumb(btn, true);
+    rescrawl();
+    place(btn, true);
     onSelect(btn);
   }
 
-  // With only two options this behaves as a single fluid toggle: a click
-  // anywhere in the bar (including the gaps and the already-active option)
-  // flips to the other option, not just clicks on the inactive button.
+  // A click anywhere in the switch (including the already-active option)
+  // moves on to the next option, so with two it behaves as one toggle.
   wrap.addEventListener('click', function (e) {
-    var activeBtn = wrap.querySelector('.goo-toggle__btn.is-active');
-    var clickedBtn = e.target.closest('.goo-toggle__btn');
+    var activeBtn = wrap.querySelector('.switch__btn.is-active');
+    var clickedBtn = e.target.closest('.switch__btn');
     var target = (clickedBtn && clickedBtn !== activeBtn) ? clickedBtn : null;
 
     if (!target) {
-      var idx = Array.prototype.indexOf.call(tabs, activeBtn);
-      target = tabs[(idx + 1) % tabs.length];
+      var idx = Array.prototype.indexOf.call(btns, activeBtn);
+      target = btns[(idx + 1) % btns.length];
     }
 
     select(target);
   });
 
-  // Keep the pill aligned if the bar reflows (font load, resize).
+  // Keep the mark aligned if the switch reflows (font load, resize).
   wrap.__reposition = function () {
-    moveThumb(wrap.querySelector('.goo-toggle__btn.is-active'), false);
+    place(wrap.querySelector('.switch__btn.is-active') || btns[0], false);
   };
 
+  rescrawl();
   wrap.__reposition();
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(wrap.__reposition);
   }
 }
 
-// One global resize listener repositions whichever goo toggles are present.
+// Any switch nobody claimed (e.g. on /switch-lab/) still gets its motion.
+// Runs last in initPage(), after the switches that do something on select.
+function initSwitches() {
+  document.querySelectorAll('.switch').forEach(function (w) {
+    initSwitch(w, function () {});
+  });
+}
+
+// One global resize listener repositions whichever switches are present.
 window.addEventListener('resize', function () {
-  document.querySelectorAll('.goo-toggle').forEach(function (w) {
+  document.querySelectorAll('.switch').forEach(function (w) {
     if (w.__reposition) {
       w.__reposition();
     }
@@ -283,7 +261,7 @@ window.addEventListener('resize', function () {
    ========================================================================== */
 
 function initResearchTabs() {
-  initGooToggle(document.querySelector('.research-tabs'), function (btn) {
+  initSwitch(document.querySelector('.research-tabs'), function (btn) {
     var key = btn.getAttribute('data-panel');
     var current = document.querySelector('.research-panel.is-active');
     var next = document.getElementById('panel-' + key);
@@ -359,6 +337,11 @@ function initPhotoLightbox() {
   var captionLocation = overlay.querySelector(".lightbox-overlay__caption-location");
   var captionDate = overlay.querySelector(".lightbox-overlay__caption-date");
   var items = Array.prototype.slice.call(document.querySelectorAll(".photo-grid__item"));
+  // The photos being stepped through, as indices into items, in order: the
+  // whole gallery, or just the featured reel when opened from there.
+  // currentIndex is a position in seq, not in items.
+  var allSeq = items.map(function (item, i) { return i; });
+  var seq = allSeq;
   var currentIndex = -1;
   var zoomRect = null;
   var lastTouchTime = 0; // see the touch gestures below
@@ -388,8 +371,6 @@ function initPhotoLightbox() {
       var btn = document.createElement("button");
       btn.type = "button";
       btn.className = "lightbox-overlay__strip-thumb";
-      var caption = item.getAttribute("data-caption");
-      btn.setAttribute("aria-label", "Show photo " + (i + 1) + (caption ? ": " + caption : ""));
       var img = document.createElement("img");
       var gridImg = item.querySelector("img");
       img.src = gridImg ? gridImg.getAttribute("src") : item.getAttribute("href");
@@ -399,7 +380,7 @@ function initPhotoLightbox() {
       btn.appendChild(img);
       btn.addEventListener("click", function (e) {
         e.stopPropagation();
-        showPhoto(i);
+        showPhoto(seq.indexOf(i));
       });
       strip.appendChild(btn);
       stripThumbs.push(btn);
@@ -408,15 +389,41 @@ function initPhotoLightbox() {
     overlay.classList.add("has-strip");
   }
 
+  // Switch which photos the lightbox steps through: the strip is reordered to
+  // match, with the photos outside the sequence hidden.
+  function setSequence(next) {
+    if (next !== seq) {
+      seq = next;
+      layoutStrip();
+    }
+  }
+
+  function layoutStrip() {
+    if (!strip) {
+      return;
+    }
+    stripThumbs.forEach(function (btn) {
+      btn.hidden = true;
+    });
+    seq.forEach(function (i, pos) {
+      var btn = stripThumbs[i];
+      var caption = items[i].getAttribute("data-caption");
+      btn.setAttribute("aria-label", "Show photo " + (pos + 1) + (caption ? ": " + caption : ""));
+      btn.hidden = false;
+      strip.appendChild(btn);
+    });
+  }
+  layoutStrip();
+
   function updateStrip(smooth) {
     if (counter) {
-      counter.textContent = (currentIndex + 1) + " / " + items.length;
+      counter.textContent = (currentIndex + 1) + " / " + seq.length;
     }
     if (!strip) {
       return;
     }
     stripThumbs.forEach(function (btn, i) {
-      var on = i === currentIndex;
+      var on = i === seq[currentIndex];
       btn.classList.toggle("is-current", on);
       if (on) {
         btn.setAttribute("aria-current", "true");
@@ -424,7 +431,7 @@ function initPhotoLightbox() {
         btn.removeAttribute("aria-current");
       }
     });
-    var cur = stripThumbs[currentIndex];
+    var cur = stripThumbs[seq[currentIndex]];
     strip.scrollTo({
       left: cur.offsetLeft + cur.offsetWidth / 2 - strip.clientWidth / 2,
       behavior: smooth && !reduceMotion ? "smooth" : "auto"
@@ -434,8 +441,8 @@ function initPhotoLightbox() {
   // Warm the cache for the photos either side, so next/prev (arrow keys,
   // swipes, the strip) show up without waiting on the network.
   function preload(index) {
-    if (items.length > 1) {
-      new Image().src = items[(index + items.length) % items.length].getAttribute("href");
+    if (seq.length > 1) {
+      new Image().src = items[seq[(index + seq.length) % seq.length]].getAttribute("href");
     }
   }
 
@@ -514,13 +521,18 @@ function initPhotoLightbox() {
     }
   });
 
-  function showPhoto(index) {
-    if (!items.length) {
+  // index is a position in the current sequence; passing a sequence switches
+  // to it first (see setSequence).
+  function showPhoto(index, sequence) {
+    if (sequence) {
+      setSequence(sequence);
+    }
+    if (!seq.length) {
       return;
     }
     var wasOpen = overlay.classList.contains("is-active") && currentIndex !== -1;
-    currentIndex = (index + items.length) % items.length;
-    var item = items[currentIndex];
+    currentIndex = (index + seq.length) % seq.length;
+    var item = items[seq[currentIndex]];
     prevBtn.hidden = false;
     nextBtn.hidden = false;
     stopZoom();
@@ -580,21 +592,24 @@ function initPhotoLightbox() {
   items.forEach(function (item, index) {
     item.addEventListener("click", function (e) {
       e.preventDefault();
-      showPhoto(index);
+      showPhoto(index, allSeq);
     });
   });
 
   // Featured reel tiles (top of /photos/) share their grid tile's href, so
-  // they open that photo's slot in the main sequence -- favourites aren't
-  // counted twice in the counter and filmstrip.
+  // they reuse its slide -- but step through the featured photos only, in
+  // reel order, rather than the whole gallery.
   var hrefs = items.map(function (item) { return item.getAttribute("href"); });
+  var featuredSeq = [];
   document.querySelectorAll(".photo-feature__item").forEach(function (tile) {
+    var index = hrefs.indexOf(tile.getAttribute("href"));
+    if (index === -1) {
+      return;
+    }
+    var pos = featuredSeq.push(index) - 1;
     tile.addEventListener("click", function (e) {
-      var index = hrefs.indexOf(tile.getAttribute("href"));
-      if (index !== -1) {
-        e.preventDefault();
-        showPhoto(index);
-      }
+      e.preventDefault();
+      showPhoto(pos, featuredSeq);
     });
   });
 
@@ -620,6 +635,20 @@ function initPhotoLightbox() {
     pressTarget = e.target;
   }, true);
 
+  // Whether a click on the filmstrip itself landed out in the empty space
+  // either side of the thumbnails, rather than in the gaps between (or just
+  // around) them, where it's a near miss on a thumbnail.
+  function inStripMargin(e) {
+    var first = strip.firstElementChild;
+    var last = strip.lastElementChild;
+    if (!first || !last) {
+      return true;
+    }
+    var slack = 12;
+    return e.clientX < first.getBoundingClientRect().left - slack ||
+      e.clientX > last.getBoundingClientRect().right + slack;
+  }
+
   overlay.addEventListener("click", function (e) {
     // The backdrop, or the empty space either side of the filmstrip (which
     // spans the full width), counts as clicking off the photo -- with a
@@ -629,7 +658,7 @@ function initPhotoLightbox() {
     if (Date.now() - lastTouchTime < 800) {
       return;
     }
-    var offPhoto = e.target === overlay || (strip && e.target === strip);
+    var offPhoto = e.target === overlay || (strip && e.target === strip && inStripMargin(e));
     if (offPhoto && e.target === pressTarget) {
       closeLightbox();
     }
@@ -650,8 +679,9 @@ function initPhotoLightbox() {
 
   // The photo's own zoom on touch screens, as a translate + scale about its
   // top-left corner (the page itself can't pinch-zoom -- touch-action: none on
-  // the overlay). Swipes step through photos (or close, downwards) only while
-  // unzoomed; zoomed, one finger pans instead.
+  // the overlay). A pinch zooms only while held, springing back on release;
+  // a double-tap zooms until the next one. Swipes step through photos (or
+  // close, downwards) only while unzoomed; zoomed, one finger pans instead.
   var tz = { s: 1, x: 0, y: 0 };
   var gesture = null;
   var lastTap = null;
@@ -748,12 +778,9 @@ function initPhotoLightbox() {
       return;
     }
     if (gesture.type === "pinch") {
-      if (e.touches.length > 0) {
-        return; // a finger is still down: wait for it, and don't count it as a swipe
-      }
-      if (tz.s < 1.05) {
-        resetTouchZoom(true);
-      }
+      // A pinch is a peek: it springs back out as soon as either finger
+      // lifts. The finger left down (if any) is ignored, not taken as a swipe.
+      resetTouchZoom(true);
       gesture = null;
       return;
     }
@@ -806,9 +833,9 @@ function initPhotoLightbox() {
     updateZoomOrigin: updateZoomOrigin,
     stopZoom: stopZoom,
     openByHref: function (href) {
-      var index = items.map(function (item) { return item.getAttribute("href"); }).indexOf(href);
+      var index = hrefs.indexOf(href);
       if (index !== -1) {
-        showPhoto(index);
+        showPhoto(index, allSeq);
       }
     }
   };
@@ -845,12 +872,263 @@ function initPhotoLightbox() {
    Featured reel: edge buttons + smooth wheel scrolling (top of /photos/)
    ========================================================================== */
 
+// Paints each featured photo's colour palette into the thin strip under it,
+// measured from the photo itself once it has loaded (see photoPalette()), as
+// chips ordered dark to light so the strip reads calmly.
+function paintFeaturePalettes(section) {
+  section.querySelectorAll(".photo-feature__item").forEach(function (item) {
+    var img = item.querySelector("img");
+    var strip = item.querySelector(".photo-feature__palette");
+    if (!img || !strip) {
+      return;
+    }
+    function paint() {
+      var palette;
+      try {
+        palette = photoPalette(img);
+      } catch (e) {
+        return; // e.g. a cross-origin image, whose pixels can't be read
+      }
+      if (palette.length) {
+        strip.style.background = paletteGradient(palette);
+        strip.classList.add("is-painted");
+      }
+    }
+    if (img.complete && img.naturalWidth) {
+      paint();
+    } else {
+      img.addEventListener("load", paint, { once: true });
+    }
+  });
+}
+
+var PALETTE_SIZE_PX = 96;     // long side of the copy that gets measured
+var PALETTE_SEEDS = 16;       // clusters to start with, before merging
+var PALETTE_MAX_COLOURS = 12;
+var PALETTE_MERGE = 0.06;     // clusters closer than this merge into one
+var PALETTE_MIN_SHARE = 0.02; // smaller clusters are dropped as noise
+var PALETTE_HUE_WEIGHT = 2;   // how much more hue/saturation counts than lightness
+
+// A photo's main colours as [[hex, share], ...]: k-means on a small copy of
+// it in OKLab, where equal distances look equally different, with the hue
+// and saturation axes weighted up. So light and shadowed parts of the same
+// colour group together while different colours of similar brightness don't:
+// Pre-history's olive slopes stay apart from its dark earth, and Glow's
+// foliage apart from its shadows. It starts with more clusters than it keeps
+// (seeded farthest-first, so it's deterministic and reaches the distinct
+// colours), then merges the closest pairs until they're all distinct and
+// there are at most PALETTE_MAX_COLOURS.
+function photoPalette(img) {
+  var scale = Math.min(1, PALETTE_SIZE_PX / Math.max(img.naturalWidth, img.naturalHeight));
+  var w = Math.max(1, Math.round(img.naturalWidth * scale));
+  var h = Math.max(1, Math.round(img.naturalHeight * scale));
+  var canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  var ctx = canvas.getContext("2d", { willReadFrequently: true });
+  ctx.drawImage(img, 0, 0, w, h);
+  var data = ctx.getImageData(0, 0, w, h).data;
+
+  var px = [];
+  for (var i = 0; i < data.length; i += 4) {
+    var lab = rgbToOklab(data[i], data[i + 1], data[i + 2]);
+    px.push({
+      rgb: [data[i], data[i + 1], data[i + 2]],
+      lab: lab,
+      f: [lab[0], lab[1] * PALETTE_HUE_WEIGHT, lab[2] * PALETTE_HUE_WEIGHT]
+    });
+  }
+
+  function dist(a, b) {
+    var dl = a[0] - b[0], da = a[1] - b[1], db = a[2] - b[2];
+    return dl * dl + da * da + db * db;
+  }
+
+  // Seed: the pixel nearest the mean colour, then repeatedly the pixel
+  // farthest from every seed so far.
+  var mean = [0, 0, 0];
+  px.forEach(function (p) {
+    for (var d = 0; d < 3; d++) {
+      mean[d] += p.f[d] / px.length;
+    }
+  });
+  var nearest = px.reduce(function (best, p) {
+    return dist(p.f, mean) < dist(best.f, mean) ? p : best;
+  });
+  var centres = [nearest.f.slice()];
+  var gap = px.map(function (p) { return dist(p.f, centres[0]); });
+  while (centres.length < PALETTE_SEEDS) {
+    var far = 0;
+    for (var j = 1; j < px.length; j++) {
+      if (gap[j] > gap[far]) {
+        far = j;
+      }
+    }
+    if (gap[far] === 0) {
+      break; // fewer distinct colours than seeds
+    }
+    centres.push(px[far].f.slice());
+    for (j = 0; j < px.length; j++) {
+      gap[j] = Math.min(gap[j], dist(px[j].f, px[far].f));
+    }
+  }
+
+  // Assigns every pixel to its nearest centre; returns each centre's size
+  // and the mean of its pixels.
+  var owner = new Array(px.length);
+  function assign() {
+    var sums = centres.map(function () { return { f: [0, 0, 0], n: 0 }; });
+    px.forEach(function (p, k) {
+      var best = 0;
+      for (var c = 1; c < centres.length; c++) {
+        if (dist(p.f, centres[c]) < dist(p.f, centres[best])) {
+          best = c;
+        }
+      }
+      owner[k] = best;
+      sums[best].n++;
+      for (var d = 0; d < 3; d++) {
+        sums[best].f[d] += p.f[d];
+      }
+    });
+    return sums;
+  }
+
+  var sums;
+  for (var iter = 0; iter < 20; iter++) {
+    sums = assign();
+    centres = sums.map(function (s, c) {
+      return s.n ? s.f.map(function (v) { return v / s.n; }) : centres[c];
+    });
+  }
+
+  // Merge the closest pair (size-weighted) while any pair is too close to
+  // tell apart or there are too many, then assign once more.
+  sums = assign();
+  var groups = centres.map(function (f, c) {
+    return { f: f, n: sums[c].n };
+  }).filter(function (g) {
+    return g.n;
+  });
+  while (groups.length > 1) {
+    var bi = 0, bj = 1, bd = Infinity;
+    for (var a = 0; a < groups.length; a++) {
+      for (var b = a + 1; b < groups.length; b++) {
+        var dd = dist(groups[a].f, groups[b].f);
+        if (dd < bd) {
+          bd = dd;
+          bi = a;
+          bj = b;
+        }
+      }
+    }
+    if (Math.sqrt(bd) >= PALETTE_MERGE && groups.length <= PALETTE_MAX_COLOURS) {
+      break;
+    }
+    var ga = groups[bi], gb = groups[bj], n = ga.n + gb.n;
+    ga.f = ga.f.map(function (v, d) { return (v * ga.n + gb.f[d] * gb.n) / n; });
+    ga.n = n;
+    groups.splice(bj, 1);
+  }
+  centres = groups.map(function (g) { return g.f; });
+  assign();
+
+  // Each chip shows the most saturated third of its cluster: a plain average
+  // muddies a colour with its dim, greyed fringes (Glow's orange came out
+  // brown), but the eye reads a colour by its most vivid pixels.
+  var members = centres.map(function () { return []; });
+  px.forEach(function (p, k) {
+    members[owner[k]].push(p);
+  });
+  return members.filter(function (m) {
+    return m.length / px.length >= PALETTE_MIN_SHARE;
+  }).map(function (m) {
+    m.sort(function (p, q) {
+      return chroma(q.lab) - chroma(p.lab);
+    });
+    var vivid = m.slice(0, Math.ceil(m.length / 3));
+    var hex = "#" + [0, 1, 2].map(function (d) {
+      var sum = 0;
+      vivid.forEach(function (p) { sum += p.rgb[d]; });
+      return ("0" + Math.round(sum / vivid.length).toString(16)).slice(-2);
+    }).join("");
+    return [hex, m.length / px.length];
+  });
+
+  function chroma(lab) {
+    return lab[1] * lab[1] + lab[2] * lab[2];
+  }
+}
+
+// sRGB (0-255) -> OKLab (https://bottosson.github.io/posts/oklab/).
+function rgbToOklab(r, g, b) {
+  function lin(c) {
+    c /= 255;
+    return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  }
+  r = lin(r);
+  g = lin(g);
+  b = lin(b);
+  var l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+  var m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+  var s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+  return [
+    0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
+    1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
+    0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s
+  ];
+}
+
+// [[hex, share], ...] -> a hard-stop linear-gradient of chips split by
+// hairline gaps. Widths aim at how much of the photo each colour seems to
+// take up rather than its pixel count: the square root of its share, so big
+// shadow areas don't squeeze the accents to slivers, then boosted by its
+// saturation, since a small vivid glow draws the eye more than a wide grey.
+// Shares are normalised, since clusters too small to show are dropped.
+function paletteGradient(palette) {
+  var total = 0;
+  var chips = palette.map(function (c) {
+    var lab = hexToOklab(c[0]);
+    var size = Math.sqrt(c[1]) * (1 + 5 * Math.sqrt(lab[1] * lab[1] + lab[2] * lab[2]));
+    total += size;
+    return { hex: c[0], size: size, light: hexLightness(c[0]) };
+  }).sort(function (a, b) {
+    return a.light - b.light;
+  });
+  var at = 0;
+  var stops = [];
+  chips.forEach(function (chip, i) {
+    var from = at.toFixed(2) + "%";
+    at += chip.size / total * 100;
+    var to = at.toFixed(2) + "%";
+    if (i === chips.length - 1) {
+      stops.push(chip.hex + " " + from + " " + to);
+    } else {
+      stops.push(chip.hex + " " + from + " calc(" + to + " - 1px)");
+      stops.push("transparent calc(" + to + " - 1px) " + to);
+    }
+  });
+  return "linear-gradient(to right, " + stops.join(", ") + ")";
+}
+
+function hexToOklab(hex) {
+  var n = parseInt(hex.slice(1), 16);
+  return rgbToOklab(n >> 16, (n >> 8) & 255, n & 255);
+}
+
+// Perceived lightness (0-1) of a #rrggbb colour, for ordering the bands.
+function hexLightness(hex) {
+  var n = parseInt(hex.slice(1), 16);
+  return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
+}
+
 function initPhotoFeature() {
   var section = document.querySelector(".photo-feature");
   if (!section || section.dataset.featureInit) {
     return;
   }
   section.dataset.featureInit = "1";
+  paintFeaturePalettes(section);
 
   var reel = section.querySelector(".photo-feature__reel");
   var prev = section.querySelector('.photo-feature__edge[data-dir="-1"]');
@@ -910,11 +1188,14 @@ function initPhotoFeature() {
     }
   }
 
-  // The edges only show when the reel overflows, and fade out at either end.
+  // The edge bars only show when the reel overflows, and go away at either
+  // end; is-at-start / is-at-end switch the reel's edge fades off there too.
   function update() {
     var max = maxScroll();
     var at = position();
     section.classList.toggle("is-scrollable", max > 1);
+    section.classList.toggle("is-at-start", at <= 1);
+    section.classList.toggle("is-at-end", at >= max - 1);
     prev.disabled = at <= 1;
     next.disabled = at >= max - 1;
   }
@@ -1333,7 +1614,31 @@ function initPhotoMap() {
     if (bounds.length === 1) {
       map.setView(bounds[0], 10);
     } else {
-      map.fitBounds(bounds, { padding: [30, 30] });
+      fitWithoutRepeats(bounds);
+    }
+
+    // Frames every pin, but never so far out that the world repeats side by
+    // side. At zoom z the world is 256 * 2^z px wide, so zoom in at least
+    // until one copy fills the map's width, then keep the view inside that
+    // copy. That zoom is usually fractional, so snapping is loosened just for
+    // this call; the next +/- or scroll zoom lands back on whole levels.
+    function fitWithoutRepeats(latLngs) {
+      var width = map.getSize().x;
+      if (!width) {
+        map.fitBounds(latLngs, { padding: [30, 30] });
+        return;
+      }
+      var zoom = Math.max(
+        map.getBoundsZoom(latLngs, false, L.point(60, 60)),
+        Math.ceil(Math.log2(width / 256) * 4) / 4
+      );
+      var center = L.latLngBounds(latLngs).getCenter();
+      var halfSpan = width / 2 / (256 * Math.pow(2, zoom)) * 360;
+      var lng = Math.min(Math.max(center.lng, halfSpan - 180), 180 - halfSpan);
+      var snap = map.options.zoomSnap;
+      map.options.zoomSnap = 0.25;
+      map.setView([center.lat, lng], zoom);
+      map.options.zoomSnap = snap;
     }
 
     // Flies to one photo's pin and opens its popup -- used by the lightbox's
@@ -1581,6 +1886,49 @@ function initGeoGame() {
       map.setView([20, 0], 1);
     }
 
+    // Frames the reveal: the closest zoom at which the guess pin, the actual
+    // pin and the actual pin's (already open) photo popup all fit on screen.
+    // A plain fitBounds on the two points ignores the popup, which then
+    // covers the guess or runs off the edge of the map.
+    function fitRevealView(guess, actual, popup) {
+      var size = map.getSize();
+      var pin = 9 + 6; // pin radius (see geoGamePinIcon) + breathing room
+      var pad = { top: 10, right: 10, bottom: 10, left: 48 }; // left clears the zoom control
+
+      // The popup's extent relative to the actual pin, in screen pixels --
+      // this doesn't change with zoom, so measure it once.
+      var mapRect = mapEl.getBoundingClientRect();
+      var popupRect = popup.getElement().getBoundingClientRect();
+      var anchor = map.latLngToContainerPoint(actual);
+      var popupBox = {
+        left: popupRect.left - mapRect.left - anchor.x,
+        right: popupRect.right - mapRect.left - anchor.x,
+        top: popupRect.top - mapRect.top - anchor.y
+      };
+
+      var zoom, minX, maxX, minY, maxY;
+      for (zoom = 8; zoom >= map.getMinZoom(); zoom--) {
+        var g = map.project(guess, zoom);
+        var a = map.project(actual, zoom);
+        minX = Math.min(g.x - pin, a.x - pin, a.x + popupBox.left);
+        maxX = Math.max(g.x + pin, a.x + pin, a.x + popupBox.right);
+        minY = Math.min(g.y - pin, a.y + popupBox.top);
+        maxY = Math.max(g.y + pin, a.y + pin);
+        if (maxX - minX <= size.x - pad.left - pad.right &&
+            maxY - minY <= size.y - pad.top - pad.bottom) {
+          break;
+        }
+      }
+      zoom = Math.max(zoom, map.getMinZoom());
+
+      // Centre the combined box inside the padded viewport.
+      var center = L.point(
+        (minX + maxX) / 2 - (pad.left - pad.right) / 2,
+        (minY + maxY) / 2 - (pad.top - pad.bottom) / 2
+      );
+      map.setView(map.unproject(center, zoom), zoom);
+    }
+
     function submitGuess() {
       if (!guessLatLng || settled) {
         return;
@@ -1599,7 +1947,10 @@ function initGeoGame() {
         '<a href="' + p.full + '" class="photo-map__popup">' +
           '<img src="' + p.thumb + '" alt="">' +
           popupCaption + popupLocation +
-        "</a>"
+        "</a>",
+        // fitRevealView() already frames the popup; auto-panning on open
+        // would shove the guess pin out of view.
+        { autoPan: false }
       );
       actualMarker.on("popupopen", function (e) {
         var link = e.popup.getElement().querySelector(".photo-map__popup");
@@ -1614,11 +1965,8 @@ function initGeoGame() {
         dashArray: "6 8"
       }).addTo(map);
 
-      map.fitBounds(L.latLngBounds([[guessLatLng.lat, guessLatLng.lng], actual]), {
-        padding: [50, 50],
-        maxZoom: 8
-      });
       actualMarker.openPopup();
+      fitRevealView(guessLatLng, actual, actualMarker.getPopup());
 
       // Reveal the photo's name + place as a caption overlay, mirroring the
       // gallery hover. Hidden entirely if this photo has neither.
@@ -1713,37 +2061,99 @@ function redrawGeoGame() {
    Collapsible sections on /photos/ (native <details class="photo-section">)
    ========================================================================== */
 
-// Adds a quick fade to opening and closing (styles in _photo-grid.scss).
-// Opening just flags the section before the browser opens it; closing is
-// held back until the fade-out has run.
+// Folds sections open and shut: the section's height slides between the
+// summary's and its full height while the contents fade, via the Web
+// Animations API -- one height animation plus a few opacity ones (which the
+// compositor runs), and nothing at all on page load. A click mid-fold turns
+// it around from wherever it's got to. Closing keeps the section open (and
+// flagged .is-closing, which turns the chevron early) until the fold is done.
 function initPhotoSections() {
   var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduceMotion || !Element.prototype.animate) {
+    return; // plain native <details> toggling
+  }
+  var ease = "cubic-bezier(0.2, 0.8, 0.2, 1)";
+
   document.querySelectorAll(".photo-section").forEach(function (section) {
     var summary = section.querySelector(":scope > summary");
     if (!summary || section.dataset.sectionInit) {
       return;
     }
     section.dataset.sectionInit = "1";
-    var timer = null;
+    var fold = null;
+    var fades = [];
+
+    function height() {
+      return section.getBoundingClientRect().height;
+    }
+
+    // What the section measures shut: down to the bottom of its summary, plus
+    // its own bottom border (a widget card's padding goes when it's closed).
+    function closedHeight() {
+      return summary.getBoundingClientRect().bottom - section.getBoundingClientRect().top +
+        parseFloat(window.getComputedStyle(section).borderBottomWidth);
+    }
+
+    function stop() {
+      if (fold) {
+        fold.onfinish = null;
+        fold.cancel();
+        fold = null;
+      }
+      fades.forEach(function (a) { a.cancel(); });
+      fades = [];
+    }
+
+    function contents() {
+      return Array.prototype.filter.call(section.children, function (el) { return el !== summary; });
+    }
+
+    function run(from, to, duration, kids, starts, opening, done) {
+      // clip rather than hidden: no new formatting context, so the heading's
+      // margins don't shift the moment the fold starts.
+      section.style.overflow = "clip";
+      fold = section.animate({ height: [from + "px", to + "px"] }, { duration: duration, easing: ease });
+      fades = kids.map(function (el, i) {
+        return el.animate({ opacity: [starts[i], opening ? 1 : 0] }, {
+          duration: opening ? duration : duration * 0.7,
+          easing: "ease",
+          fill: "forwards"
+        });
+      });
+      fold.onfinish = function () {
+        stop();
+        section.style.overflow = "";
+        if (done) {
+          done();
+        }
+      };
+    }
 
     summary.addEventListener("click", function (e) {
-      if (reduceMotion) {
+      e.preventDefault();
+      // Read the current frame before stopping anything, so a click mid-fold
+      // turns it around from where it is; otherwise the contents start fully
+      // shown (open) or hidden (shut).
+      var from = height();
+      var kids = contents();
+      var midFold = fades.length > 0;
+      var starts = kids.map(function (el) {
+        return midFold ? parseFloat(window.getComputedStyle(el).opacity) : (section.open ? 1 : 0);
+      });
+      stop();
+
+      if (!section.open || section.classList.contains("is-closing")) {
+        section.classList.remove("is-closing");
+        section.open = true;
+        run(from, height(), 300, kids, starts, true);
         return;
       }
-      window.clearTimeout(timer);
-      if (!section.open) {
-        section.classList.remove("is-closing");
-        section.classList.add("is-opening");
-        timer = window.setTimeout(function () { section.classList.remove("is-opening"); }, 250);
-        return; // the browser opens it
-      }
-      e.preventDefault();
-      section.classList.remove("is-opening");
+
       section.classList.add("is-closing");
-      timer = window.setTimeout(function () {
+      run(from, closedHeight(), 220, kids, starts, false, function () {
         section.classList.remove("is-closing");
         section.open = false;
-      }, 150);
+      });
     });
   });
 }
@@ -1797,16 +2207,23 @@ function chromaSvg(parent, tag, attrs, text) {
   return el;
 }
 
+// A photo's palette as a ring, arcs by share -- but none thinner than
+// CHROMA_MIN_ARC of the circle, so an accent the analysis picked out (purple
+// wisteria at 2% of the pixels) is actually visible rather than a hairline.
+var CHROMA_MIN_ARC = 0.07;
+
 function chromaRing(palette) {
   if (!palette || !palette.length) {
     return "";
   }
   var total = palette.reduce(function (s, c) { return s + c[1]; }, 0);
+  var arcs = palette.map(function (c) { return Math.max(c[1] / total, CHROMA_MIN_ARC); });
+  var sum = arcs.reduce(function (s, a) { return s + a; }, 0);
   var acc = 0;
-  return "conic-gradient(" + palette.map(function (c) {
-    var from = acc / total * 100;
-    acc += c[1];
-    return c[0] + " " + from.toFixed(2) + "% " + (acc / total * 100).toFixed(2) + "%";
+  return "conic-gradient(" + palette.map(function (c, i) {
+    var from = acc / sum * 100;
+    acc += arcs[i];
+    return c[0] + " " + from.toFixed(2) + "% " + (acc / sum * 100).toFixed(2) + "%";
   }).join(", ") + ")";
 }
 
@@ -1816,7 +2233,7 @@ function initChromatic() {
     return;
   }
   root.dataset.chromaInit = "1";
-  initGooToggle(root.querySelector(".chroma__toggle"), function (btn) {
+  initSwitch(root.querySelector(".chroma__toggle"), function (btn) {
     root.classList.toggle("is-colours", btn.dataset.view === "colours");
   });
   var status = root.querySelector(".chroma__status");
@@ -1836,6 +2253,7 @@ function initChromatic() {
 function buildChromatic(root, data) {
   var base = root.dataset.baseurl || "";
   var mapEl = root.querySelector(".chroma__map");
+  var toggleEl = mapEl.querySelector(".chroma__toggle");
   var pointsEl = root.querySelector(".chroma__points");
   var svg = root.querySelector(".chroma__lines");
   var axesSvg = root.querySelector(".chroma__axes");
@@ -1952,16 +2370,19 @@ function buildChromatic(root, data) {
     var pad = size / 2 + 8;
     // Extra room at the positive ends (right, top) for the arrowheads.
     var padEnd = pad + 14;
+    // At the top, also a band as tall as the Images | Colours switch in the
+    // corner, so no photo ever sits beneath it.
+    var padTop = Math.max(padEnd, (toggleEl ? toggleEl.offsetHeight : 0) + pad);
     // Gutters (left, bottom) holding the tick labels, where no photo can cover them.
     var gl = 24, gb = 16;
     var plotW = W - gl;
     var rx = (xMax - xMin) || 1, ry = (yMax - yMin) || 1;
-    var plotH = Math.round(Math.min(Math.max((plotW - pad - padEnd) * ry / rx + pad + padEnd, 300), 620));
+    var plotH = Math.round(Math.min(Math.max((plotW - pad - padEnd) * ry / rx + pad + padTop, 300), 620));
     var H = plotH + gb;
     // One scale for both axes: the map may be letterboxed, never stretched.
-    var s = Math.min((plotW - pad - padEnd) / rx, (plotH - pad - padEnd) / ry);
+    var s = Math.min((plotW - pad - padEnd) / rx, (plotH - pad - padTop) / ry);
     var ox = gl + pad + (plotW - pad - padEnd - rx * s) / 2;
-    var oy = padEnd + (plotH - pad - padEnd - ry * s) / 2;
+    var oy = padTop + (plotH - pad - padTop - ry * s) / 2;
     mapEl.style.height = H + "px";
     mapEl.style.setProperty("--pt", size + "px");
     svg.setAttribute("viewBox", "0 0 " + W + " " + H);
@@ -1973,6 +2394,11 @@ function buildChromatic(root, data) {
     });
     drawAxes(W, H, gl, plotH, s, ox - xMin * s, oy + yMax * s);
     drawLines();
+    // The switch lives in the map, which was hidden when it first measured
+    // itself: realign its mark now there's something to measure.
+    if (toggleEl && toggleEl.__reposition) {
+      toggleEl.__reposition();
+    }
   }
 
   // The plane the embedding lives in. Classical MDS centres the photos, so the
@@ -2022,7 +2448,13 @@ function buildChromatic(root, data) {
     chromaSvg(axesSvg, "path", { class: "chroma__axis-line", d: "M" + (x0 - 3.5) + " 7L" + x0 + " 1L" + (x0 + 3.5) + " 7" });
     // The titles go in a layer above the photos so a crowded map can't bury them.
     chromaSvg(titlesSvg, "text", { class: "chroma__axis-title", x: W - 2, y: y0 - 7, "text-anchor": "end" }, "Chromatic dimension 1");
-    chromaSvg(titlesSvg, "text", { class: "chroma__axis-title", x: x0 + 8, y: 10 }, "Chromatic dimension 2");
+    var title2 = chromaSvg(titlesSvg, "text", { class: "chroma__axis-title", x: x0 + 8, y: 10 }, "Chromatic dimension 2");
+    // On a narrow map it would run under the switch in the corner: then it
+    // sits on the axis's other side.
+    if (toggleEl && x0 + 8 + title2.getComputedTextLength() > toggleEl.offsetLeft - 8) {
+      title2.setAttribute("x", x0 - 8);
+      title2.setAttribute("text-anchor", "end");
+    }
   }
 
   function showTip(p) {
@@ -2281,10 +2713,108 @@ function initPage() {
   initChromatic();
   initPhotoSections();
   initReadMore();
+  initSwitches();
   renderMath();
   renderPlotly();
   renderMermaid();
   bumpIt();
+}
+
+/* ==========================================================================
+   Mobile sidebar (below $large; _includes/mobile-sidebar.html)
+   ========================================================================== */
+
+// The corner menu button opens a left sidebar (profile, pages, contact
+// links, theme); the backdrop, Esc, the button again or following a link
+// closes it. The button tucks away while scrolling down and returns on the
+// way up. All of it sits in the persistent shell, outside Swup's swapped
+// #page-content, so this is bound once.
+function initMobileSidebar() {
+  var root = document.documentElement;
+  var toggle = document.querySelector(".msb-toggle");
+  var panel = document.getElementById("mobile-sidebar");
+  if (!toggle || !panel) {
+    return;
+  }
+  var backdrop = document.querySelector(".msb-backdrop");
+  var mobile = window.matchMedia("(max-width: 924px)"); // below $large
+
+  // Marks where you are in the page list. Worked out afresh each time it
+  // opens, since the sidebar outlives Swup's page swaps.
+  function markCurrentPage() {
+    var path = window.location.pathname;
+    panel.querySelectorAll(".msb__nav a").forEach(function (a) {
+      var linkPath = new URL(a.href, window.location.origin).pathname;
+      var here = linkPath === "/" ? (path === "/" || path === "/index.html") : path.indexOf(linkPath) === 0;
+      if (here) {
+        a.setAttribute("aria-current", "page");
+      } else {
+        a.removeAttribute("aria-current");
+      }
+    });
+  }
+
+  function setOpen(open) {
+    if (open) {
+      markCurrentPage();
+      toggle.classList.remove("is-tucked");
+    }
+    root.classList.toggle("msb-open", open);
+    toggle.setAttribute("aria-expanded", String(open));
+    toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+  }
+
+  function isOpen() {
+    return root.classList.contains("msb-open");
+  }
+
+  toggle.addEventListener("click", function () { setOpen(!isOpen()); });
+  if (backdrop) {
+    backdrop.addEventListener("click", function () { setOpen(false); });
+  }
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && isOpen()) {
+      setOpen(false);
+      toggle.focus();
+    }
+  });
+  panel.addEventListener("click", function (e) {
+    if (e.target.closest("a[href]")) {
+      setOpen(false);
+    }
+  });
+  var themeBtn = panel.querySelector(".msb__theme");
+  if (themeBtn) {
+    themeBtn.addEventListener("click", toggleTheme);
+  }
+  mobile.addEventListener("change", function () {
+    if (!mobile.matches) {
+      setOpen(false);
+    }
+  });
+
+  // Tuck the button away on the way down, bring it back on the way up (or
+  // near the top). Read once a frame at most.
+  var lastY = window.scrollY;
+  var ticking = false;
+  window.addEventListener("scroll", function () {
+    if (ticking) {
+      return;
+    }
+    ticking = true;
+    window.requestAnimationFrame(function () {
+      ticking = false;
+      var y = window.scrollY;
+      if (!isOpen() && mobile.matches) {
+        if (y > 80 && y > lastY + 4) {
+          toggle.classList.add("is-tucked");
+        } else if (y < lastY - 4 || y <= 80) {
+          toggle.classList.remove("is-tucked");
+        }
+      }
+      lastY = y;
+    });
+  }, { passive: true });
 }
 
 // Exposed so the Swup navigation layer can re-run page setup after a swap.
@@ -2310,6 +2840,8 @@ $(document).ready(function () {
   // Enable the theme toggle (the masthead persists across Swup navigations,
   // so this only needs to be bound once).
   $('#theme-toggle').on('click', toggleTheme);
+
+  initMobileSidebar();
 
   // Enable the sticky footer
   $(window).resize(function () {

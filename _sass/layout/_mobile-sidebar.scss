@@ -1,0 +1,292 @@
+/* ==========================================================================
+   MOBILE SIDEBAR (_includes/mobile-sidebar.html)
+   Below $large -- phones and portrait tablets, where the profile used to
+   stack above every page -- the top navbar and that profile block give way
+   to a corner menu button and a left sidebar holding both, so the page gets
+   the whole screen. Open/closed is .msb-open on <html>, set by
+   initMobileSidebar() in _main.js, which also tucks the button away while
+   scrolling down. From $large up none of this shows.
+   ========================================================================== */
+
+$msb-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+$msb-time: 0.3s;
+$msb-width: 280px;
+$msb-button: 40px;
+$msb-inset: 10px;
+
+@include breakpoint($large) {
+  .msb-toggle,
+  .msb,
+  .msb-backdrop {
+    display: none;
+  }
+}
+
+@media screen and (max-width: $large - 1) {
+  // The navbar and the in-page profile are what this replaces.
+  .masthead,
+  #main > .sidebar {
+    display: none;
+  }
+
+  // updateNav() in the greedy-nav plugin pads the body to the masthead's
+  // height, inline -- and jQuery measures a hidden masthead at its full
+  // height, so it has to be overruled.
+  body {
+    padding-top: 0 !important;
+  }
+
+  // Room for the menu button above the page's title.
+  #main {
+    margin-top: $msb-inset + $msb-button + 12px;
+  }
+
+  /* ---------- Menu button ---------- */
+
+  .msb-toggle {
+    position: fixed;
+    top: calc(#{$msb-inset} + env(safe-area-inset-top, 0px));
+    left: calc(#{$msb-inset} + env(safe-area-inset-left, 0px));
+    z-index: 60; // over the sidebar, where it's the close button
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: $msb-button;
+    height: $msb-button;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--global-border-color);
+    border-radius: $border-radius;
+    background: color-mix(in srgb, var(--global-bg-color) 85%, transparent);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    color: var(--global-text-color);
+    cursor: pointer;
+    transition: transform 0.25s $msb-ease, opacity 0.2s ease;
+
+    svg {
+      display: block;
+      fill: currentColor;
+    }
+
+    // Tucked away while scrolling down; back on the way up.
+    &.is-tucked {
+      transform: translateY(calc(-100% - #{$msb-inset} - 4px));
+      opacity: 0;
+    }
+
+    body.lightbox-open & {
+      visibility: hidden;
+    }
+  }
+
+  // The three bars fold into a cross while the sidebar is open.
+  .msb-toggle__bar {
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: transform $msb-time $msb-ease, opacity 0.2s ease;
+
+    html.msb-open & {
+      &--top {
+        transform: translateY(5px) rotate(45deg);
+      }
+
+      &--mid {
+        opacity: 0;
+      }
+
+      &--bot {
+        transform: translateY(-5px) rotate(-45deg);
+      }
+    }
+  }
+
+  /* ---------- The sidebar ---------- */
+
+  .msb {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 55;
+    display: flex;
+    flex-direction: column;
+    width: min(#{$msb-width}, 82vw);
+    // Clear of the menu button, which becomes its close button.
+    padding: calc(#{$msb-inset + $msb-button + 16px} + env(safe-area-inset-top, 0px)) 1.5em 1.5em;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background-color: var(--global-bg-color);
+    border-right: 1px solid var(--global-border-color);
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform $msb-time $msb-ease, visibility 0s linear $msb-time;
+
+    html.msb-open & {
+      transform: none;
+      visibility: visible;
+      box-shadow: 0 0 40px rgba(#000, 0.25);
+      transition: transform $msb-time $msb-ease, visibility 0s;
+    }
+
+    // The site-wide `transition: all` (_base.scss) would have every link,
+    // icon and image animate the visibility it inherits, lingering tappable
+    // after the sidebar has gone. Keep their hover fades only.
+    :is(a, img, i, span, p, h3) {
+      transition-property: color, background-color, border-color, opacity;
+    }
+  }
+
+  html.msb-open body {
+    overflow: hidden; // no scrolling the page behind the sidebar
+  }
+
+  .msb-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(#000, 0.35);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity $msb-time ease;
+
+    html.msb-open & {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+
+  /* ---------- Its contents ---------- */
+
+  // Profile, then the pages, then the contact links and theme: the profile's
+  // wrappers step aside so its parts can be ordered around the page list.
+  .msb__profile,
+  .msb__profile [itemscope] {
+    display: contents;
+  }
+
+  .msb {
+    .author__avatar {
+      order: 1;
+      text-align: left;
+
+      img {
+        max-width: 128px;
+        margin: 0;
+      }
+    }
+
+    .author__content {
+      order: 2;
+      text-align: left;
+    }
+
+    // The sidebar's heading, so a step up from the page links below it.
+    .author__name {
+      margin: 0.6em 0 0;
+      font-family: $sans-serif;
+      font-size: $type-size-4;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .msb__nav {
+      order: 3;
+    }
+
+    .author__urls-wrapper {
+      order: 4;
+    }
+
+    .author__urls {
+      display: block !important; // over the old Follow menu's fadeToggle
+      text-align: left;
+      font-size: $type-size-6;
+    }
+
+    .author__desktop {
+      display: block;
+    }
+
+    .msb__theme {
+      order: 5;
+    }
+  }
+
+  // The site's pages: the sidebar's main content, so larger than the
+  // contact links, between two hairlines.
+  .msb__nav {
+    display: flex;
+    flex-direction: column;
+    margin: 1em 0;
+    padding: 0.5em 0;
+    border-top: 1px solid var(--global-border-color);
+    border-bottom: 1px solid var(--global-border-color);
+    font-family: $sans-serif;
+
+    a {
+      padding: 0.45em 0;
+      color: var(--global-text-color);
+      font-size: $type-size-5;
+      text-decoration: none;
+
+      &:hover {
+        color: var(--global-link-color);
+      }
+
+      &[aria-current="page"] {
+        color: var(--global-base-color);
+        font-weight: 700;
+      }
+    }
+  }
+
+  // Theme toggle: names what it switches to.
+  .msb__theme {
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+    margin: 1.25em 0 0;
+    padding: 0.4em 0;
+    border: 0;
+    background: none;
+    color: var(--global-text-color-light);
+    font-family: $sans-serif;
+    font-size: $type-size-6;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+      color: var(--global-text-color);
+    }
+  }
+
+  // Scoped under .msb__theme to outrank Font Awesome's own `display`.
+  .msb__theme {
+    .msb__theme-icon--light,
+    .msb__theme-label--light {
+      display: none;
+    }
+
+    html[data-theme="dark"] & {
+      .msb__theme-icon--dark,
+      .msb__theme-label--dark {
+        display: none;
+      }
+
+      .msb__theme-icon--light,
+      .msb__theme-label--light {
+        display: inline-block;
+      }
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .msb,
+  .msb-toggle,
+  .msb-toggle__bar,
+  .msb-backdrop {
+    transition: none !important;
+  }
+}

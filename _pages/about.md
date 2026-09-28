@@ -9,21 +9,21 @@ redirect_from:
 
 <!-- bundle exec jekyll serve -l -H localhost -->
 
-I'm a fourth-year undergraduate at Harvard, double majoring in mathematics (honours) and physics (Class of 2027). Alongside my bachelor's, I'm also completing a concurrent master's (A.M.) in mathematics. I recently spent Hilary & Trinity terms as a visiting student at [Oriel College](https://www.oriel.ox.ac.uk/), Oxford University, studying at the [Mathematical Institute](https://www.maths.ox.ac.uk/). 
+I'm a fourth-year undergraduate at Harvard, double majoring in mathematics (honours) and physics (Class of 2027). Alongside my bachelor's, I'm also completing a concurrent master's (A.M.) in mathematics. I recently spent Hilary & Trinity terms as a visiting student at Oriel College, Oxford University, studying at the [Mathematical Institute](https://www.maths.ox.ac.uk/). 
 
 
-My research interests lie broadly in algebra, geometry, and topology, especially in
+My [research interests]({{ "/research/" | relative_url }}) lie broadly in algebra, geometry, and topology, especially in
 repurposing the traditionally pure machinery of these fields for applied tasks —
 for example, using homological methods to study quantum error correction, or
 topological methods for data analysis. I'm also interested in category theory and
 relative algebraic geometry.
 
 
-Outside of all this, I'm the academic lead for [NZPMC](https://www.nzpmc.com/). And away from academic work entirely, I enjoy cycling, [taking photos]({{ "/photos/" | relative_url }}), and Geoguessr/[OSINT](https://www.cambridge.org/core/journals/european-journal-of-international-security/article/rise-of-opensource-intelligence/21122432399ECB8078BF0D89A76D0586)-style puzzles. If you want to know more about the latter two, have a go at guessing below.
+Outside of all this, I'm the academic lead for [NZPMC](https://www.nzpmc.com/). And away from academic work entirely, I enjoy cycling, [taking photos]({{ "/photos/" | relative_url }}), and Geoguessr/[OSINT](https://www.cambridge.org/core/journals/european-journal-of-international-security/article/rise-of-opensource-intelligence/21122432399ECB8078BF0D89A76D0586)-style puzzles. If you want to know more about the latter two, have a play around with some of the widgets below!
 
-{% include chromatic-geography.html gallery_link=true compact=true %}
+{% include chromatic-geography.html gallery_link=true compact=true widget=true %}
 
-{% include geo-game.html compact=true %}
+{% include geo-game.html compact=true widget=true %}
 
 {% comment %} Shared by both widgets above: photos open here full size. {% endcomment %}
 <div id="lightbox-overlay" class="lightbox-overlay">

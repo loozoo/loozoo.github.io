@@ -232,6 +232,11 @@ publication_category:
   writing:
     title: "Writing & Projects"
 
+# Look of every option switch (research tabs, Chromatic Map's Images | Colours):
+# rule, brackets, block or marker. Compare them at /switch-lab/; the styles are
+# in _sass/layout/_switch.scss. Needs a `jekyll serve` restart to take effect.
+switch_style: marker
+
 
 # These settings control how pages and collections are included in the site
 defaults:

@@ -2,15 +2,16 @@
   The photo location game, shared by the homepage and /photos/, in a
   collapsible section like the others (.photo-section). Needs the page's
   #lightbox-overlay (for viewing the photo full size); played by initGeoGame()
-  in assets/js/_main.js. Pass compact=true for a quieter, body-size title.
+  in assets/js/_main.js. Pass compact=true for a quieter, body-size title, and widget=true to put
+  it in its own card (the homepage).
 {% endcomment %}
 {% assign geo_files = site.static_files | where_exp: "file", "file.path contains '/images/photos/'" | sort: "name" %}
 {% assign geo_files = geo_files | where_exp: "file", "site.data.photos[file.name].visible != false" %}
 {% assign geo_points = geo_files | where_exp: "file", "site.data.photos[file.name].lat" | where_exp: "file", "site.data.photos[file.name].lng" %}
 {% if geo_points.size > 1 %}
-<details class="photo-section geo-section{% if include.compact %} photo-section--compact{% endif %}" open>
+<details class="photo-section geo-section{% if include.compact %} photo-section--compact{% endif %}{% if include.widget %} photo-section--widget{% endif %}" open>
 <summary class="photo-section__summary"><h2 class="geo-game__heading">Geoguessr</h2></summary>
-<p class="geo-game__sub">Guess where each photo was taken by dropping a pin on the map. The closer your geolocation, the more points you score.</p>
+<p class="geo-game__sub">Guess where each photo was taken by dropping a pin on the map. The closer your guess, the more points you score.</p>
 <section id="geo-game" class="geo-game" aria-label="Guess where my photos were taken">
   <div class="geo-game__board">
     <div class="geo-game__panel">

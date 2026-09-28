@@ -13,26 +13,7 @@
 }
 
 .chroma__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.6em 1em;
   margin-bottom: 0.9em;
-
-  // Subtitle on the left (wrapping as needed), the Images | Colours switch
-  // on the right; they only stack on narrow screens.
-  > div:first-child {
-    flex: 1 1 auto;
-    min-width: 0;
-  }
-
-  .chroma__toggle {
-    flex: none;
-  }
-
-  @include breakpoint(max-width $small) {
-    flex-wrap: wrap;
-  }
 
   .chroma__sub {
     margin-bottom: 0;
@@ -84,6 +65,23 @@
 .chroma__map {
   position: relative;
   height: 400px;
+}
+
+// The Images | Colours switch, in the map's top-right corner. layout() in
+// _main.js keeps a band along the top of the plot free of photos, as tall as
+// this, so it never covers one. A touch larger than the small switch it was,
+// and backed with the surface colour so the grid doesn't run through it.
+.chroma__map .chroma__toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 6; // over the photos and axis titles, under the hover tip
+  font-size: $type-size-6 * 0.92;
+  // The card's surface laid over the page's, as the card itself is: in dark
+  // mode that surface is a translucent tint, which alone would double up.
+  background:
+    linear-gradient(var(--chroma-surface, transparent), var(--chroma-surface, transparent))
+    var(--global-bg-color);
 }
 
 // Axes, ticks and guide lines, drawn by drawAxes() in _main.js. Kept faint so
@@ -282,6 +280,8 @@
 }
 
 .chroma__tip-loc {
+  @include photo-place;
+  margin-top: 0.1em;
   color: var(--global-text-color-light);
 }
 

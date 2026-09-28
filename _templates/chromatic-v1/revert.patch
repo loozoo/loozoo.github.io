@@ -1,0 +1,313 @@
+--- a/scripts/chromatic_analysis.py
++++ b/scripts/chromatic_analysis.py
+@@ -14,11 +14,19 @@
+      marked `visible: false` in _data/photos.yml.
+   2. Each photo is EXIF-rotated, downsampled, and a deterministic sample of
+      its opaque pixels is converted to CIELAB.
+-  3. MiniBatchKMeans on the pooled samples gives K global colour centres
+-     c_1..c_K shared by every photo; each photo becomes a histogram mu_i on
+-     those centres (a probability vector).
++  3. Each photo gets its own colour signature: KMeans on its own samples
++     (COLOURS_PER_PHOTO clusters), then any two clusters closer than MERGE_DE
++     (Delta E*ab) merged into one, repeatedly -- so a sky is one blue, not
++     three near-identical ones. mu_i is the resulting set of colours with
++     their pixel shares. (Earlier versions used one codebook shared by the
++     whole gallery; its colours followed the gallery's most common pixels,
++     so a colour prominent in only one photo -- purple flowers, a red door
++     -- had no centre of its own and was counted as some duller neighbour.)
+   4. D_ij = W_1(mu_i, mu_j), the exact 1-Wasserstein / Earth Mover's distance
+-     with ground cost ||c_a - c_b||_2 in Lab (POT's network-simplex ot.emd2).
++     between the two signatures, with ground cost ||c_a - c_b||_2 in Lab
++     between photo i's colours and photo j's (POT's network-simplex ot.emd2).
++     Each photo's palette is its signature's largest colours -- distinct by
++     construction, so an accent isn't crowded out by shades of one sky.
+   5. Classical MDS: B = -1/2 J (D o D) J with J = I - 11^T/N, B = V L V^T.
+      Mode k's coordinates are sqrt(l_k) v_k for each positive eigenvalue l_k;
+      modes 1-2 are the map. W_1 need not be Euclidean, so B can have negative
+@@ -39,12 +47,17 @@
+ import yaml
+ from PIL import Image, ImageOps
+ from skimage.color import lab2rgb, rgb2lab
+-from sklearn.cluster import MiniBatchKMeans
++from sklearn.cluster import KMeans
+ 
+ SEED = 42
+-N_CENTRES = 64
++COLOURS_PER_PHOTO = 20   # KMeans clusters per photo, before merging
++MERGE_DE = 10.0          # clusters closer than this (Delta E*ab) become one colour
++PALETTE_MERGE_DE = 18.0  # ...and for the palette shown, closer than this
++ACCENT_SLOTS = 2         # palette places kept for small but colourful accents
++ACCENT_MIN_SHARE = 0.01  # an accent covers at least this much of the photo
++ACCENT_MIN_CHROMA = 15.0 # ...and is at least this colourful (C*ab)
++ACCENT_HUE_GAP = 25.0    # degrees of hue within which one colour stands in for another
+ PIXELS_PER_PHOTO = 5000
+-CODEBOOK_PIXELS = 180000
+ ANALYSIS_MAX_DIM = 256   # px on the long side before sampling
+ N_NEIGHBOURS = 5
+ N_MODES = 12             # modes exported (coordinates + extremes)
+@@ -93,6 +106,104 @@
+     return rgb2lab(px[None, :, :])[0]
+ 
+ 
++def colour_signature(lab, name):
++    """A photo's own colours: (centres, weights), largest share first.
++
++    KMeans on the photo's Lab samples, then the closest pair of clusters is
++    merged while any pair is nearer than MERGE_DE. A merged centre is the
++    share-weighted mean of the two -- exactly the mean of their pixels,
++    since each centre is the mean of its own.
++    """
++    k = min(COLOURS_PER_PHOTO, len(np.unique(lab.round(1), axis=0)))
++    seed = (SEED + zlib.crc32(name.encode())) % (2 ** 32)
++    km = KMeans(n_clusters=k, random_state=seed, n_init=4).fit(lab)
++    w = np.bincount(km.labels_, minlength=k) / len(lab)
++    keep = w > 0  # drop any cluster KMeans left empty
++    return merge_close(km.cluster_centers_[keep], w[keep], MERGE_DE)
++
++
++def merge_close(centres, weights, threshold):
++    """Merge the closest pair of colours while any pair is nearer than
++    threshold (Delta E*ab); largest share first."""
++    centres, weights = [c for c in centres], list(weights)
++    while len(centres) > 1:
++        C = np.asarray(centres)
++        d = np.linalg.norm(C[:, None] - C[None], axis=-1)
++        np.fill_diagonal(d, np.inf)
++        a, b = np.unravel_index(np.argmin(d), d.shape)
++        if d[a, b] >= threshold:
++            break
++        wa, wb = weights[a], weights[b]
++        centres[a] = (centres[a] * wa + centres[b] * wb) / (wa + wb)
++        weights[a] = wa + wb
++        del centres[b], weights[b]
++    C, w = np.asarray(centres), np.asarray(weights)
++    # Largest share first; ties broken by (L, a, b) so the order is stable.
++    order = np.lexsort((C[:, 2], C[:, 1], C[:, 0], -w))
++    C, w = C[order], w[order]
++    return C, w / w.sum()
++
++
++def chroma(lab):
++    return np.hypot(lab[..., 1], lab[..., 2])
++
++
++def palette_of(C, w):
++    """The colours shown for a photo: its main colours plus its accents.
++
++    Main colours: the signature merged further (PALETTE_MERGE_DE), so the
++    ring shows distinct colours rather than steps of one sky. Accents: of
++    the signature's small colours (>= ACCENT_MIN_SHARE, >= ACCENT_MIN_CHROMA)
++    that no main colour stands in for, those whose hue is furthest from
++    every main colour's. The eye goes to purple wisteria or pink blossom
++    however few pixels they cover, but by area alone they'd be merged into
++    a grey or ranked out of the palette. Judged by hue angle rather than
++    Delta E, which is mostly lightness and chroma: a grey is "near" a pink
++    in Delta E, never in hue. Largest share first.
++    """
++    def hue(c):
++        return np.degrees(np.arctan2(c[..., 2], c[..., 1])) % 360
++
++    def hue_gap(h, hs):
++        d = np.abs(hs - h) % 360
++        return np.minimum(d, 360 - d)
++
++    # Only the main colours that fit in the palette alongside the accents
++    # can stand in for one (a small pink can survive the merge as its own
++    # colour and still be ranked out by area), and only colourful ones.
++    main, _ = merge_close(C, w, PALETTE_MERGE_DE)
++    main = main[:PALETTE_SIZE - ACCENT_SLOTS]
++    main = main[chroma(main) >= ACCENT_MIN_CHROMA * 2 / 3]
++    main_h, main_c = hue(main), chroma(main)
++
++    def represented(c):
++        # A main colour of much the same hue, nearly as colourful.
++        return np.any((hue_gap(hue(c), main_h) < ACCENT_HUE_GAP) & (main_c >= 0.6 * chroma(c)))
++
++    def novelty(c):
++        return hue_gap(hue(c), main_h).min() if len(main) else 180.0
++
++    cand = [i for i in range(len(w))
++            if w[i] >= ACCENT_MIN_SHARE and chroma(C[i]) >= ACCENT_MIN_CHROMA
++            and not represented(C[i])]
++    # Most novel hue first, then the more colourful.
++    cand.sort(key=lambda i: (-novelty(C[i]), -chroma(C[i])))
++    accents = []
++    for i in cand:  # each a different hue from the last
++        if len(accents) < ACCENT_SLOTS and all(hue_gap(hue(C[i]), hue(C[j])) >= ACCENT_HUE_GAP for j in accents):
++            accents.append(i)
++    rest = np.ones(len(w), bool)
++    rest[accents] = False
++    # The main colours without the accents' pixels, so nothing counts twice.
++    mc, mw = merge_close(C[rest], w[rest], PALETTE_MERGE_DE)
++    mw = mw * w[rest].sum()  # back to shares of the whole photo
++    keep = PALETTE_SIZE - len(accents)
++    cols = list(mc[:keep]) + [C[i] for i in accents]
++    shares = list(mw[:keep]) + [w[i] for i in accents]
++    order = np.argsort(-np.asarray(shares), kind="stable")
++    return [cols[i] for i in order], [shares[i] for i in order]
++
++
+ def lab_to_hex(lab):
+     with warnings.catch_warnings():
+         warnings.simplefilter("ignore")  # out-of-gamut clipping warnings
+@@ -119,32 +230,21 @@
+         sys.exit(f"error: need at least 3 readable photos, found {n}")
+     print(f"{n} photos ({len(photos) - n} unreadable)")
+ 
+-    # Global colour codebook.
+-    pooled = np.concatenate(samples)
+-    rng = np.random.default_rng(SEED)
+-    if len(pooled) > CODEBOOK_PIXELS:
+-        pooled = pooled[np.sort(rng.choice(len(pooled), CODEBOOK_PIXELS, replace=False))]
+-    k = min(N_CENTRES, len(pooled))
+-    km = MiniBatchKMeans(n_clusters=k, random_state=SEED, batch_size=4096, n_init=5,
+-                         max_iter=300).fit(pooled)
+-    # Order centres canonically (by L, a, b) so the codebook itself is stable.
+-    order = np.lexsort(km.cluster_centers_.T[::-1])
+-    centres = km.cluster_centers_[order]
+-    km.cluster_centers_ = centres
+-
+-    # Per-photo histograms on the shared support.
+-    hists = np.zeros((n, k))
+-    for i, s in enumerate(samples):
+-        hists[i] = np.bincount(km.predict(s), minlength=k)
+-    hists /= hists.sum(axis=1, keepdims=True)
+-    assert np.allclose(hists.sum(axis=1), 1.0)
++    # Each photo's own colour signature.
++    sigs = [colour_signature(s, path.name) for s, (path, _) in zip(samples, kept)]
++    for C, w in sigs:
++        assert np.isclose(w.sum(), 1.0) and np.all(w > 0)
++    sizes = [len(w) for _, w in sigs]
++    print(f"colours per photo after merging: {min(sizes)}-{max(sizes)}, "
++          f"median {int(np.median(sizes))}")
+ 
+-    # Exact 1-Wasserstein distances (network simplex, 64x64 plans -- fast).
+-    cost = ot.dist(centres, centres, metric="euclidean")
++    # Exact 1-Wasserstein distances between signatures (network simplex on
++    # at most 20x20 plans -- fast).
+     D = np.zeros((n, n))
+     for i in range(n):
+         for j in range(i + 1, n):
+-            D[i, j] = D[j, i] = ot.emd2(hists[i], hists[j], cost, numItermax=1_000_000)
++            cost = ot.dist(sigs[i][0], sigs[j][0], metric="euclidean")
++            D[i, j] = D[j, i] = ot.emd2(sigs[i][1], sigs[j][1], cost, numItermax=1_000_000)
+     assert np.allclose(D, D.T) and np.allclose(np.diag(D), 0)
+     assert np.all(D >= -1e-9)
+ 
+@@ -187,7 +287,7 @@
+     records = []
+     for i, (path, meta) in enumerate(kept):
+         others = [j for j in np.argsort(D[i], kind="stable") if j != i][:N_NEIGHBOURS]
+-        top = np.argsort(-hists[i], kind="stable")[:PALETTE_SIZE]
++        pal_c, pal_w = palette_of(*sigs[i])
+         thumb = THUMB_DIR / path.name
+         if not thumb.exists():
+             warn(f"{path.name} has no thumbnail in images/photos-thumb/; using the full image")
+@@ -198,7 +298,7 @@
+             "title": meta.get("caption") or None,
+             "location": meta.get("location") or None,
+             "average_hex": lab_to_hex(mean_lab[i]),
+-            "palette": [[lab_to_hex(centres[c]), r(hists[i, c], 4)] for c in top if hists[i, c] > 0],
++            "palette": [[lab_to_hex(c), r(w, 4)] for c, w in zip(pal_c, pal_w)],
+             "x": r(coords[i, 0]),
+             "y": r(coords[i, 1]),
+             "modes": [r(v) for v in coords[i, :n_modes]],
+@@ -225,10 +325,14 @@
+     out = {
+         "method": {
+             "colour_space": "CIELAB (D65, from sRGB)",
+-            "colour_centres": int(k),
++            "colours_per_photo": COLOURS_PER_PHOTO,
++            "merge_delta_e": MERGE_DE,
+             "pixels_per_photo": PIXELS_PER_PHOTO,
+-            "codebook": "MiniBatchKMeans on pooled Lab samples",
+-            "distance": "1-Wasserstein / Earth Mover's Distance (exact, network simplex)",
++            "signatures": "per-photo KMeans on Lab samples, clusters nearer than merge_delta_e merged",
++            "palette": (f"signature merged below Delta E {PALETTE_MERGE_DE:g}, plus up to {ACCENT_SLOTS} "
++                        f"accents (>= {ACCENT_MIN_SHARE:.0%} share, C >= {ACCENT_MIN_CHROMA:g}, hue >= "
++                        f"{ACCENT_HUE_GAP:g} deg from the main colours'); {PALETTE_SIZE} colours at most"),
++            "distance": "1-Wasserstein / Earth Mover's Distance between signatures (exact, network simplex)",
+             "ground_cost": "Euclidean distance in Lab",
+             "embedding": "classical multidimensional scaling",
+             "seed": SEED,
+@@ -243,7 +347,8 @@
+             "most_negative_eigenvalue": r(evals[-1]) if neg.any() else 0.0,
+             "most_negative_over_first": r(-evals[-1] / evals[0], 4) if neg.any() else 0.0,
+         },
+-        "spectrum": {"eigenvalues": [r(v) for v in evals]},
++        # Below tol is rounding noise (it flips sign between runs): write it as 0.
++        "spectrum": {"eigenvalues": [r(v) if abs(v) > tol else 0.0 for v in evals]},
+         "modes": modes,
+         "closest_pair": {"ids": [ids[ci], ids[cj]], "distance": r(D[ci, cj], 4)},
+         "furthest_pair": {"ids": [ids[fi], ids[fj]], "distance": r(D[fi, fj], 4)},
+--- a/_includes/chromatic-geography.html
++++ b/_includes/chromatic-geography.html
+@@ -63,7 +63,7 @@
+     <p>Each photo is analysed for its colour distribution and placed at a point in a higher-dimensional colour space. In this space, photos with similar colour palettes are grouped closer together. Every pair of photos is then compared and tested for how much colour would need to be moved (and how far) to turn one palette into the other. This gives rise to a notion of distance between photos based on colour, and one can project these distances down onto two-dimensional space. Note that the closest \(n\) neighbours aren't necessarily the closest in the 2D plane, but rather, the closest in the higher-dimensional colour space (the 2d projection doesn't preserve those distances perfectly!)</p>
+ 
+     <h3>Mathematical explanation:</h3>
+-    <p>Each image is represented by a probability measure \(\mu_i\) over CIELAB colour space (separate into \(K\) colour buckets and normalise). Pairwise distances between photos are then measured using \(1\)-Wasserstein distance (with transport cost given by the usual Euclidean metric on CIELAB), yielding a distance matrix \(D_{ij}=W_1(\mu_i,\mu_j)\). Classical multidimensional scaling can then be applied to \(D\); writing \(J=I-\frac{1}{n}\mathbf{1}\mathbf{1}^\top\), one obtains a doubly-centered matrix \(B=-\frac{1}{2}J(D\circ D)J\). From here, perform an eigendecomposition to get \(B=V\Lambda V^\top\) and take only the leading two positive eigendirections \(X_{2D}=V_2\Lambda_2^{1/2}\). The resulting 2D projection approximates pairwise chromatic distances between photos.</p>
++    <p>Each image is represented by a discrete probability measure \(\mu_i=\sum_a w_a\,\delta_{c_a}\) on its own colours in CIELAB space: its pixels are clustered into up to 20 colours \(c_a\), any two closer than \(\Delta E=10\) are merged, and each weight \(w_a\) is that colour's share of the pixels. Pairwise distances between photos are then measured using \(1\)-Wasserstein distance (with transport cost given by the usual Euclidean metric on CIELAB, between one photo's colours and the other's), yielding a distance matrix \(D_{ij}=W_1(\mu_i,\mu_j)\). Classical multidimensional scaling can then be applied to \(D\); writing \(J=I-\frac{1}{n}\mathbf{1}\mathbf{1}^\top\), one obtains a doubly-centered matrix \(B=-\frac{1}{2}J(D\circ D)J\). From here, perform an eigendecomposition to get \(B=V\Lambda V^\top\) and take only the leading two positive eigendirections \(X_{2D}=V_2\Lambda_2^{1/2}\). The resulting 2D projection approximates pairwise chromatic distances between photos.</p>
+   </details>
+   </details>
+ </div>
+--- a/assets/js/_main.js
++++ b/assets/js/_main.js
+@@ -2207,16 +2207,23 @@
+   return el;
+ }
+ 
++// A photo's palette as a ring, arcs by share -- but none thinner than
++// CHROMA_MIN_ARC of the circle, so an accent the analysis picked out (purple
++// wisteria at 2% of the pixels) is actually visible rather than a hairline.
++var CHROMA_MIN_ARC = 0.07;
++
+ function chromaRing(palette) {
+   if (!palette || !palette.length) {
+     return "";
+   }
+   var total = palette.reduce(function (s, c) { return s + c[1]; }, 0);
++  var arcs = palette.map(function (c) { return Math.max(c[1] / total, CHROMA_MIN_ARC); });
++  var sum = arcs.reduce(function (s, a) { return s + a; }, 0);
+   var acc = 0;
+-  return "conic-gradient(" + palette.map(function (c) {
+-    var from = acc / total * 100;
+-    acc += c[1];
+-    return c[0] + " " + from.toFixed(2) + "% " + (acc / total * 100).toFixed(2) + "%";
++  return "conic-gradient(" + palette.map(function (c, i) {
++    var from = acc / sum * 100;
++    acc += arcs[i];
++    return c[0] + " " + from.toFixed(2) + "% " + (acc / sum * 100).toFixed(2) + "%";
+   }).join(", ") + ")";
+ }
+ 
+--- a/assets/js/main.min.js
++++ b/assets/js/main.min.js
+@@ -2298,16 +2298,23 @@
+   return el;
+ }
+ 
++// A photo's palette as a ring, arcs by share -- but none thinner than
++// CHROMA_MIN_ARC of the circle, so an accent the analysis picked out (purple
++// wisteria at 2% of the pixels) is actually visible rather than a hairline.
++var CHROMA_MIN_ARC = 0.07;
++
+ function chromaRing(palette) {
+   if (!palette || !palette.length) {
+     return "";
+   }
+   var total = palette.reduce(function (s, c) { return s + c[1]; }, 0);
++  var arcs = palette.map(function (c) { return Math.max(c[1] / total, CHROMA_MIN_ARC); });
++  var sum = arcs.reduce(function (s, a) { return s + a; }, 0);
+   var acc = 0;
+-  return "conic-gradient(" + palette.map(function (c) {
+-    var from = acc / total * 100;
+-    acc += c[1];
+-    return c[0] + " " + from.toFixed(2) + "% " + (acc / total * 100).toFixed(2) + "%";
++  return "conic-gradient(" + palette.map(function (c, i) {
++    var from = acc / sum * 100;
++    acc += arcs[i];
++    return c[0] + " " + from.toFixed(2) + "% " + (acc / sum * 100).toFixed(2) + "%";
+   }).join(", ") + ")";
+ }
+ 

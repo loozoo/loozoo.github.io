@@ -54,6 +54,7 @@ $photo-grid-hover-zoom: false;
   background: linear-gradient(to top, rgba(#000, 0.88), rgba(#000, 0));
   color: #fff;
   font-size: 0.75rem;
+  font-weight: 600;
   line-height: 1.3;
   opacity: 0;
   transform: translateY(4px);
@@ -68,8 +69,7 @@ $photo-grid-hover-zoom: false;
 }
 
 .photo-grid__location {
-  display: block;
-  font-size: 0.7rem;
+  @include photo-place(0.55rem);
   opacity: 0.8;
 }
 
@@ -147,8 +147,80 @@ $photo-grid-hover-zoom: false;
   font-size: 1em;
 }
 
-.photo-section:not([open]) > .photo-section__summary h2::after {
+// Closed -- or closing, so the chevron turns as the section starts to fold
+// rather than once it's shut (see initPhotoSections() in _main.js).
+.photo-section:not([open]) > .photo-section__summary h2::after,
+.photo-section.is-closing > .photo-section__summary h2::after {
   transform: translateY(-0.12em) rotate(-45deg);
+}
+
+// Widget cards (the homepage, via widget=true on the includes): each section
+// in its own square-cornered tinted panel -- the Featured reel's colours --
+// headed by a bar in the masthead's crosshatch "stitching", title left and
+// chevron right. Open, a hairline under the bar sets it off from the content,
+// like the masthead's own bottom rule.
+$widget-pad: 1.1em;
+
+.photo-section.photo-section--widget {
+  margin: 1.25em 0;
+  padding: 0 $widget-pad $widget-pad;
+  border: 1px solid var(--global-border-color);
+  // Also a variable, for things inside that sit on the card (Chromatic
+  // Map's Images | Colours switch).
+  --chroma-surface: color-mix(in srgb, var(--global-base-color) 5%, var(--global-bg-color));
+  background: var(--chroma-surface);
+
+  html[data-theme="dark"] & {
+    border-color: transparent;
+    --chroma-surface: var(--global-hover-color);
+  }
+
+  &:not([open]) {
+    padding-bottom: 0;
+  }
+
+  > .photo-section__summary {
+    margin: 0 (-$widget-pad);
+    padding: 0.5em $widget-pad;
+    @include crosshatch;
+
+    h2 {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 0;
+      font-size: $type-size-7;
+      font-weight: 600;
+      line-height: 1.4;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--global-base-color);
+    }
+
+    h2::after {
+      width: 0.5em;
+      height: 0.5em;
+      margin-left: 1em;
+    }
+  }
+
+  // The rule is a shadow, not a border, so the bar is the same height open or
+  // closed -- the fold animation's closed height is just the bar's.
+  &[open] > .photo-section__summary {
+    margin-bottom: 0.85em;
+    box-shadow: inset 0 -1px 0 var(--global-border-color);
+  }
+}
+
+// Chromatic Map's card sits inside its .chroma wrapper, which carries the
+// section's outer margin -- so it follows the cards' spacing instead, with
+// extra room above to set the first card off from the text.
+.chroma.chroma--widget {
+  margin: 2.25em 0 1.25em;
+
+  > .photo-section--widget {
+    margin: 0;
+  }
 }
 
 // That heading is a flex row whose gap already spaces the chevron.
@@ -156,26 +228,8 @@ $photo-grid-hover-zoom: false;
   margin-left: 0;
 }
 
-// Opening and closing use the research tabs' panel motion (a 6px rise and
-// fade, see .research-panel): classes set by initPhotoSections() in _main.js
-// on click only, so nothing animates on page load.
-@keyframes photo-section-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-}
-
-.photo-section.is-opening > :not(summary) {
-  animation: photo-section-in 0.2s ease;
-}
-
-.photo-section.is-closing > :not(summary) {
-  opacity: 0;
-  transform: translateY(6px);
-  transition: opacity 0.15s ease, transform 0.15s ease;
-}
-
+// Opening and closing (the height fold and content fade) are animated by
+// initPhotoSections() in _main.js, on click only, so nothing moves on load.
 @media (prefers-reduced-motion: reduce) {
   .photo-section > .photo-section__summary h2::after {
     transition: none;
@@ -185,35 +239,48 @@ $photo-grid-hover-zoom: false;
 /* ==========================================================================
    FEATURED REEL (top of /photos/)
    Set apart from the square grid below: photos keep their own aspect ratio,
-   sit larger in their own panel, and carry always-visible numbered labels.
-   The panel's left/right edges are the prev/next buttons; they and smooth
-   wheel scrolling are wired up by initPhotoFeature() in _main.js.
+   sit larger, straight on the page, and carry always-visible numbered
+   labels, under a heading with a hairline rule. The prev/next bars over the
+   reel's edges, the edge fades and smooth wheel scrolling are wired up by
+   initPhotoFeature() in _main.js.
    ========================================================================== */
 
-$feature-edge: 2em;
-$feature-edge-small: 1.5em;
+$feature-fade: 2.5em;
+$feature-ring-room: 3px; // reel padding for focus rings, offset by a negative margin
+$feature-frame-height: clamp(260px, 45vw, 360px);
+
+// Registered so the edge fades can animate in and out (see the reel below).
+@property --photo-feature-fade-l {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --photo-feature-fade-r {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
 
 .photo-feature {
-  margin: 0 0 2.5em;
-  // No side padding: the edge buttons fill that space instead.
-  padding: 0.9em 0 0.6em;
-  border-radius: $border-radius * 2;
-  // Light mode follows the site's Border look -- a black rule, like the photo
-  // map -- over a faint wash of the accent colour (a warm near-white rather
-  // than a grey); dark mode swaps the rule for a soft tint.
-  border: 1px solid var(--global-border-color);
-  background: color-mix(in srgb, var(--global-base-color) 5%, var(--global-bg-color));
+  // Nudged up into some of the hidden title's kept space (hide_title:
+  // keep-space on /photos/).
+  margin: -0.75em 0 2.5em;
+}
 
-  html[data-theme="dark"] & {
-    border-color: transparent;
-    background: var(--global-hover-color);
-  }
+// Heading, then a hairline rule running out to the arrows.
+.photo-feature__head {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+  margin-bottom: 0.9em;
 }
 
 // Doubled class to outrank `.page__content h2`'s rule and padding.
 .photo-feature .photo-feature__heading {
-  margin: 0 0 0.8em;
-  padding: 0 0 0 $feature-edge;
+  flex: none;
+  margin: 0;
+  padding: 0;
   border: 0;
   font-size: $type-size-7;
   font-weight: 600;
@@ -221,71 +288,130 @@ $feature-edge-small: 1.5em;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--global-base-color);
-
-  @include breakpoint(max-width $small) {
-    padding-left: $feature-edge-small;
-  }
 }
 
+.photo-feature__rule {
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--global-border-color);
+}
+
+// The reel and the prev/next bars laid over its edges.
 .photo-feature__stage {
-  display: grid;
-  // minmax(0, ...) lets the reel overflow (and scroll) rather than widen.
-  grid-template-columns: $feature-edge minmax(0, 1fr) $feature-edge;
-
-  @include breakpoint(max-width $small) {
-    grid-template-columns: $feature-edge-small minmax(0, 1fr) $feature-edge-small;
-  }
+  position: relative;
 }
 
+// Prev/next bars over the reel's faded edges, the reel's full height. No
+// backing: the photo has faded to page colour at the outer edge, so the
+// chevron sits there and reads over any photo. Hovering lays a soft gradient
+// the same way as the fade (never a hard edge across the photo). A bar fades
+// out at its end of the reel, where there's nothing left to scroll to.
 .photo-feature__edge {
+  position: absolute;
+  z-index: 1;
+  // Out over the reel's focus-ring room too: photos scroll under it, and a
+  // sliver left uncovered there would still open them.
+  top: -$feature-ring-room;
+  bottom: -$feature-ring-room;
+  width: calc(#{$feature-fade} + #{$feature-ring-room});
+  isolation: isolate;
   display: flex;
   align-items: center;
-  justify-content: center;
-  // Centres the chevron on the photos rather than photos + labels.
-  padding: 0 0 2.6em;
+  padding: 0 calc(0.35em + #{$feature-ring-room});
   margin: 0;
   border: 0;
-  border-radius: $border-radius;
+  border-radius: 0;
   background: transparent;
   color: var(--global-text-color);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   line-height: 1;
-  opacity: 0.55;
+  opacity: 0.75;
   cursor: pointer;
-  transition: opacity 0.2s ease, color 0.2s ease, background 0.2s ease;
+  transition: opacity 0.2s ease, color 0.2s ease, visibility 0.2s;
+
+  &::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  &[data-dir="-1"] {
+    left: -$feature-ring-room;
+    justify-content: flex-start;
+
+    &::before {
+      background: linear-gradient(to right, var(--global-bg-color), transparent);
+    }
+  }
+
+  &[data-dir="1"] {
+    right: -$feature-ring-room;
+    justify-content: flex-end;
+
+    &::before {
+      background: linear-gradient(to left, var(--global-bg-color), transparent);
+    }
+  }
 
   &:hover:not(:disabled) {
     opacity: 1;
     color: var(--global-base-color);
-    background: var(--global-hover-color);
+
+    &::before {
+      opacity: 0.8;
+    }
   }
 
   &:focus-visible {
     outline: 2px solid var(--global-base-color);
     outline-offset: -2px;
-    opacity: 1;
   }
 
+  // At its end of the reel: invisible, but still there to catch clicks, so
+  // clicking on past the end doesn't open the photo underneath.
   &:disabled {
-    opacity: 0.15;
+    opacity: 0;
     cursor: default;
   }
 
-  // Nothing to scroll (or no JS): keep the space, hide the buttons.
+  // Nothing to scroll (or no JS): gone entirely.
   .photo-feature:not(.is-scrollable) & {
+    opacity: 0;
     visibility: hidden;
   }
 }
 
+// When there's more reel off an edge, that edge fades out under its bar.
+// Scrolled by the bars, wheel or touch; the scrollbar itself is hidden.
 .photo-feature__reel {
+  --photo-feature-fade-l: 0px;
+  --photo-feature-fade-r: 0px;
+
   display: flex;
   gap: 0.9em;
   overflow-x: auto;
-  // Room for the focus ring and the scrollbar, clear of the labels.
-  padding: 3px 3px 0.4em;
-  margin: -3px -3px 0;
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--global-text-color) 25%, transparent) transparent;
+  // Room for the focus ring.
+  padding: $feature-ring-room;
+  margin: -$feature-ring-room;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--photo-feature-fade-l), #000 calc(100% - var(--photo-feature-fade-r)), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 var(--photo-feature-fade-l), #000 calc(100% - var(--photo-feature-fade-r)), transparent);
+  transition: --photo-feature-fade-l 0.3s ease, --photo-feature-fade-r 0.3s ease;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  .photo-feature.is-scrollable:not(.is-at-start) & {
+    --photo-feature-fade-l: #{$feature-fade};
+  }
+
+  .photo-feature.is-scrollable:not(.is-at-end) & {
+    --photo-feature-fade-r: #{$feature-fade};
+  }
 }
 
 // Scoped under .photo-feature to outrank the theme's `.archive a` underline.
@@ -321,7 +447,7 @@ $feature-edge-small: 1.5em;
 
 .photo-feature__frame {
   display: block;
-  height: clamp(260px, 45vw, 360px);
+  height: $feature-frame-height;
   overflow: hidden;
   border-radius: $border-radius;
 
@@ -335,6 +461,34 @@ $feature-edge-small: 1.5em;
     height: 100%;
     width: auto;
     max-width: none;
+  }
+}
+
+// The photo's colour palette as a thin swatch (painted by
+// paintFeaturePalettes() in _main.js). Its space is reserved up front so the
+// label doesn't shift when it fills in; it then draws in from the left, and
+// thickens a touch (into the gap below) while its photo is hovered.
+.photo-feature__palette {
+  display: block;
+  // A hairline, so the photo itself leads.
+  height: 2px;
+  margin-top: 0.4em;
+  transform: scaleX(0);
+  transform-origin: left top;
+  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+
+  &.is-painted {
+    transform: scaleX(1);
+  }
+
+  .photo-feature__item:hover &.is-painted,
+  .photo-feature__item:focus-visible &.is-painted {
+    transform: scaleY(2);
+    transition-duration: 0.3s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
   }
 }
 
@@ -366,11 +520,7 @@ $feature-edge-small: 1.5em;
 }
 
 .photo-feature__location {
-  display: block;
-  margin-top: 0.2em;
-  font-size: $type-size-7;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  @include photo-place(0.58em);
   color: var(--global-text-color-light);
 }
 
@@ -481,10 +631,9 @@ $feature-edge-small: 1.5em;
 }
 
 .lightbox-overlay__caption-location {
-  display: block;
-  font-size: 0.8rem;
-  opacity: 0.85;
-  margin-top: 0.15em;
+  @include photo-place(0.68rem);
+  margin-top: 0.3em;
+  opacity: 0.8;
 }
 
 // Set by updateLocationLink() in _main.js when the photo has a pin on the
@@ -536,21 +685,42 @@ $feature-edge-small: 1.5em;
 
 // Filmstrip + counter, built by initPhotoLightbox() in _main.js when there's a
 // gallery to browse. Single-photo views (.is-single, the geo-game) hide both.
+// The strip's size lives in custom properties so short screens (laptops) and
+// phones can shrink it in one place, handing the height to the photo.
 $lightbox-thumb: 52px;
-$lightbox-thumb-small: 42px;
+$lightbox-thumb-small: 38px;
 $lightbox-strip-pad: 12px;
+// Room above and below the photo for the caption (about 4rem tall) and some
+// clearance at the top. The counter and close button sit in the side
+// margins, so they need none.
+$lightbox-reserve: 5.75rem;
+
+.lightbox-overlay {
+  --lightbox-thumb: #{$lightbox-thumb};
+  --lightbox-strip-pad: #{$lightbox-strip-pad};
+  --lightbox-strip: calc(var(--lightbox-thumb) + 2 * var(--lightbox-strip-pad));
+  --lightbox-reserve: #{$lightbox-reserve};
+
+  // Laptops: height is what's short, so a small strip and tighter clearance,
+  // handing the height to the photo (portrait ones most of all).
+  @media (min-width: $small + 1px) and (max-height: 900px) {
+    --lightbox-thumb: 34px;
+    --lightbox-strip-pad: 6px;
+    --lightbox-reserve: 5.25rem;
+  }
+}
 
 .lightbox-overlay.has-strip:not(.is-single) {
   // Centre the photo + caption in the space above the strip.
-  padding-bottom: $lightbox-thumb + 2 * $lightbox-strip-pad;
+  padding-bottom: var(--lightbox-strip);
 
   .lightbox-overlay__img {
-    max-height: unquote("min(80vh, calc(100vh - #{$lightbox-thumb + 2 * $lightbox-strip-pad} - 7.5rem))");
+    max-height: unquote("min(88vh, calc(100vh - var(--lightbox-strip) - var(--lightbox-reserve)))");
   }
 
   .lightbox-overlay__prev,
   .lightbox-overlay__next {
-    top: calc(50% - #{($lightbox-thumb + 2 * $lightbox-strip-pad) * 0.5});
+    top: calc(50% - var(--lightbox-strip) / 2);
   }
 }
 
@@ -579,7 +749,7 @@ $lightbox-strip-pad: 12px;
   gap: 6px;
   // Half the width of padding either side lets the first and last photos
   // scroll to the centre too, so the current photo is always in the middle.
-  padding: $lightbox-strip-pad 50%;
+  padding: var(--lightbox-strip-pad) 50%;
   overflow-x: auto;
   scrollbar-width: none;
   cursor: default;
@@ -595,8 +765,8 @@ $lightbox-strip-pad: 12px;
 
 .lightbox-overlay__strip-thumb {
   flex: 0 0 auto;
-  width: $lightbox-thumb;
-  height: $lightbox-thumb;
+  width: var(--lightbox-thumb);
+  height: var(--lightbox-thumb);
   margin: 0;
   padding: 0;
   overflow: hidden;
@@ -606,11 +776,6 @@ $lightbox-strip-pad: 12px;
   opacity: 0.4;
   cursor: pointer;
   transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-
-  @include breakpoint(max-width $small) {
-    width: $lightbox-thumb-small;
-    height: $lightbox-thumb-small;
-  }
 
   // Undo the full-size photo rules on `.lightbox-overlay img` above.
   img {
@@ -637,6 +802,145 @@ $lightbox-strip-pad: 12px;
     opacity: 1;
     transform: scale(1.08);
     box-shadow: 0 0 0 2px #fff;
+  }
+}
+
+// Phones: the photo takes the full width, and the controls move into bands
+// it never enters, so nothing sits on top of it. Counter and close share a
+// top bar at matching insets; prev/next flank the caption in a row above the
+// strip. The photo is centred in whatever is left between the two.
+$lightbox-m-bar: 44px;      // top bar, and the arrows' tap width
+$lightbox-m-caption: 48px;  // caption row (two single-line captions)
+$lightbox-m-strip-pad: 6px;
+$lightbox-m-strip: $lightbox-thumb-small + 2 * $lightbox-m-strip-pad;
+
+@include breakpoint(max-width $small) {
+  .lightbox-overlay {
+    --lightbox-thumb: #{$lightbox-thumb-small};
+    --lightbox-strip-pad: #{$lightbox-m-strip-pad};
+
+    padding:
+      calc(#{$lightbox-m-bar} + env(safe-area-inset-top, 0px))
+      0
+      calc(#{$lightbox-m-caption} + env(safe-area-inset-bottom, 0px));
+
+    img.lightbox-overlay__img {
+      max-width: 100vw;
+      max-height: calc(100vh - #{$lightbox-m-bar + $lightbox-m-caption});
+      max-height: calc(100dvh - #{$lightbox-m-bar + $lightbox-m-caption} - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+      box-shadow: none;
+    }
+  }
+
+  .lightbox-overlay.has-strip:not(.is-single) {
+    padding-bottom: calc(#{$lightbox-m-caption + $lightbox-m-strip} + env(safe-area-inset-bottom, 0px));
+
+    img.lightbox-overlay__img {
+      max-height: calc(100vh - #{$lightbox-m-bar + $lightbox-m-caption + $lightbox-m-strip});
+      max-height: calc(100dvh - #{$lightbox-m-bar + $lightbox-m-caption + $lightbox-m-strip} - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    }
+
+    .lightbox-overlay__caption,
+    .lightbox-overlay__prev,
+    .lightbox-overlay__next {
+      bottom: calc(#{$lightbox-m-strip} + env(safe-area-inset-bottom, 0px));
+    }
+  }
+
+  // Top bar: counter left, close right, both centred in the bar at the same
+  // inset from their edge.
+  .lightbox-overlay__counter,
+  .lightbox-overlay__close {
+    top: env(safe-area-inset-top, 0px);
+    height: $lightbox-m-bar;
+    display: flex;
+    align-items: center;
+  }
+
+  .lightbox-overlay__counter {
+    left: 0;
+    padding-left: 1rem;
+  }
+
+  .lightbox-overlay__close {
+    right: 0;
+    justify-content: flex-end;
+    width: $lightbox-m-bar + 16px;
+    padding-right: 1rem;
+    font-size: 1.6rem;
+    color: rgba(#fff, 0.8);
+  }
+
+  // Caption row, pinned above the strip, with the arrows either side of it.
+  .lightbox-overlay__caption,
+  .lightbox-overlay__prev,
+  .lightbox-overlay__next {
+    position: absolute;
+    bottom: env(safe-area-inset-bottom, 0px);
+    height: $lightbox-m-caption;
+  }
+
+  .lightbox-overlay__caption {
+    left: $lightbox-m-bar;
+    right: $lightbox-m-bar;
+    max-width: none;
+    margin: 0;
+    padding: 0 0.25em;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .lightbox-overlay__caption-text,
+  .lightbox-overlay__caption-location {
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .lightbox-overlay__caption-text {
+    font-size: 0.85rem;
+  }
+
+  .lightbox-overlay__caption-location {
+    font-size: 0.64rem;
+  }
+
+  .lightbox-overlay__prev,
+  .lightbox-overlay__next,
+  .lightbox-overlay.has-strip:not(.is-single) .lightbox-overlay__prev,
+  .lightbox-overlay.has-strip:not(.is-single) .lightbox-overlay__next {
+    top: auto;
+    transform: none;
+    width: $lightbox-m-bar;
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    font-size: 1.1rem;
+    color: rgba(#fff, 0.6);
+  }
+
+  // Same 1rem inset as the counter and close above them.
+  .lightbox-overlay__prev {
+    left: 0;
+    justify-content: flex-start;
+  }
+
+  .lightbox-overlay__next {
+    right: 0;
+    justify-content: flex-end;
+  }
+
+  .lightbox-overlay__prev[hidden],
+  .lightbox-overlay__next[hidden] {
+    display: none;
+  }
+
+  .lightbox-overlay__strip {
+    padding-top: $lightbox-m-strip-pad;
+    padding-bottom: calc(#{$lightbox-m-strip-pad} + env(safe-area-inset-bottom, 0px));
   }
 }
 
@@ -782,6 +1086,8 @@ body.lightbox-open .masthead {
 // `.leaflet-popup-content a { color: #0078A8 }` default link styling.
 .leaflet-popup-content .photo-map__popup {
   display: block;
+  // The site's font, not Leaflet's Helvetica, to match every other photo label.
+  font-family: $global-font-family;
   color: inherit;
   text-decoration: none;
   max-width: 160px;
@@ -794,12 +1100,18 @@ body.lightbox-open .masthead {
   }
 }
 
+// Title and place centred under the photo.
+.photo-map__popup-caption,
+.photo-map__popup-location {
+  text-align: center;
+}
+
 .photo-map__popup-caption {
   font-weight: 600;
   font-size: 0.85rem;
 }
 
 .photo-map__popup-location {
-  font-size: 0.75rem;
+  @include photo-place(0.55rem);
   opacity: 0.75;
 }
