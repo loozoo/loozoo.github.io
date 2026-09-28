@@ -286,7 +286,7 @@
   lng: -1.282147
   location: Binsey
 20260612_203120(1).jpg:
-  caption: 
+  caption: null
   date: '2026-06-12'
   lat: 51.751199
   lng: -1.253084
@@ -403,10 +403,10 @@
 20260828_174456.jpg:
   caption: Ambers
   date: null
+  featured: 6
   lat: -43.629331
   lng: 172.630804
   location: Port Hills
-  featured: 6
 20260828_175636.jpg:
   caption: Cove
   date: null
